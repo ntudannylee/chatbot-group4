@@ -1,4 +1,4 @@
-# echo-bot danny is shit
+# echo-bot
 
 A bot that echoes back user response.
 
