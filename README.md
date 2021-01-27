@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# echo-bot danny is
-=======
-# echo-bot
->>>>>>> ed0f520f9be02793213128cd2eaf1afc9de40cb5
+# echo-bot danny
 
 A bot that echoes back user response.
 
