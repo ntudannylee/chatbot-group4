@@ -1,5 +1,7 @@
 import googlemaps
-
+import opendata
+# 餐具友善餐廳列表
+good_list = opendata.get_data()
 # Client initialization
 API_key = 'AIzaSyAPtgFF8msgOfa_CK_FevErxHxH6HGZ8EM'
 gmaps = googlemaps.Client(key=API_key)
@@ -10,22 +12,23 @@ def googlemaps_search_location(place):
     geocode_result = gmaps.geocode(place)
     x = geocode_result[0]['geometry']['location']['lat']
     y = geocode_result[0]['geometry']['location']['lng']
-    return (x,y)
+    print('經緯度', x, y)
+    return (x, y)
 
 def googlemaps_search_nearby(x,y,place_type):
     location = (x, y)
-    print(location)
     radius = 1000    #1km
     place_type = 'restaurant'
-    result = gmaps.places_nearby(location, radius, type=place_type)
+    result = gmaps.places_nearby(location, radius, type=place_type, language='zh-TW')
 
     restaurants = result['results']
     restaurants_list=[]
     # sort the restaurant by its rating
     for i in restaurants:
         # 先過濾掉沒有rating的商店, 且使用者rating至少有300則
-        if('rating' in i and i['user_ratings_total'] > 300):
+        if('rating' in i and 'price_level' in i and i['user_ratings_total'] > 300):
             place_id=''
+            price_level= i['price_level']
             rating= i['rating']
             business_status=''
             location_x=''
@@ -50,8 +53,9 @@ def googlemaps_search_nearby(x,y,place_type):
             if('vicinity' in i):
                 address = i['vicinity']
             # create each restaurant dict
-            i = {            
+            restaurant = {            
                 'place_id':place_id,
+                'price_level':price_level,
                 'rating' : rating,
                 'business_status':business_status,
                 'location_x':location_x,
@@ -61,7 +65,7 @@ def googlemaps_search_nearby(x,y,place_type):
                 'user_ratings_total':user_ratings_total,
                 'address':address
             }
-            restaurants_list.append(i)
+            restaurants_list.append(restaurant)
 
     # 以rating排序restaurant_list
     restaurants_list = sorted(restaurants_list, key=lambda k: k['rating'], reverse=True)
@@ -78,6 +82,15 @@ def googlemaps_API(place):
     # 只先取前五個
     for i in restaurants[0:5]:
         restaurants_name.append(i['name'])
+        # print(i['photo_reference'])
+        if(restaurants_name in good_list):
+            print(restaurants_name, '為餐具友善餐廳')
     print(restaurants_name)
 
-googlemaps_API('公館')
+# show photo of restaurant
+def show_photo(ref):
+    url = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference='+ ref +'&key='+API_key
+    return url
+
+googlemaps_API('國立交通大學')
+# print(show_photo('ATtYBwLW9QK5PLE3NMjt5h3WaLa8C_yEOzK5kdR1s7IQ-r01Z8m_IWfpfE_TJJBtWk8cqKz38uXMFBpef81omW_puXAfDZBij9Cm54UecYLsMKE10AfZwBxwsXH4r71xceZ1N_RM9iFqIx7v6Ias3EWIhufwjfvbBM9yaAXmkZ6GnNyvSgm9'))
