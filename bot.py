@@ -6,7 +6,7 @@ from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
 from websrestaurantrecom import webcrawl
-from sql import test
+from sql import DB_query
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -19,7 +19,6 @@ class MyBot(ActivityHandler):
                 host=config.QNA_ENDPOINT_HOST,
             )
         )
-
     # def create_hero_card(self) -> Attachment:
     #     card = HeroCard(
     #         title="",
@@ -59,7 +58,9 @@ class MyBot(ActivityHandler):
                     )
                 ])
             elif turn_context.activity.text == "test sql":
-                await turn_context.send_activity(test())
+                output = DB_query("Select ID from user_info")
+                for i in range(0, len(output), 2):
+                    await turn_context.send_activity(output[i] + ' ' + output[i+1])
             else:
                 re = webcrawl(turn_context.activity.text)
                 message = MessageFactory.carousel([
