@@ -3,7 +3,7 @@
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext
-from botbuilder.schema import ChannelAccount
+# from botbuilder.schema import ChannelAccount
 from botbuilder.schema import ChannelAccount
 
 class MyBot(ActivityHandler):
