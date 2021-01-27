@@ -1,1 +1,5 @@
 botbuilder-integration-aiohttp>=4.11.0
+botbuilder-core
+botbuilder-ai
+flask
+botbuilder
