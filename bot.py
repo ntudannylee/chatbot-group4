@@ -17,6 +17,7 @@ class MyBot(ActivityHandler):
                 host=config.QNA_ENDPOINT_HOST,
             )
         )
+#123
 
     async def on_message_activity(self, turn_context: TurnContext):
         response = await self.qna_maker.get_answers(turn_context)
