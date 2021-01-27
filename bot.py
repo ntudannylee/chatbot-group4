@@ -17,6 +17,7 @@ class MyBot(ActivityHandler):
                 host=config.QNA_ENDPOINT_HOST,
             )
         )
+#123
 
     # def create_hero_card(self) -> Attachment:
     #     card = HeroCard(
