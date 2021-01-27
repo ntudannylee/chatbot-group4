@@ -2,9 +2,9 @@
 # Licensed under the MIT License.
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint
-from botbuilder.core import ActivityHandler, MessageFactory, TurnContext
-from botbuilder.schema import ChannelAccount
-from botbuilder.schema import ChannelAccount
+from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory
+from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
+from websrestaurantrecom import webcrawl
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -18,32 +18,64 @@ class MyBot(ActivityHandler):
             )
         )
 
+    # def create_hero_card(self) -> Attachment:
+    #     card = HeroCard(
+    #         title="",
+    #         images=[
+    #             CardImage(
+    #                 url="https://sec.ch9.ms/ch9/7ff5/e07cfef0-aa3b-40bb-9baa-7c9ef8ff7ff5/buildreactionbotframework_960.jpg"
+    #             )
+    #         ],
+    #         buttons=[
+    #             CardAction(
+    #                 type=ActionTypes.open_url,
+    #                 title="Get Started",
+    #                 value="https://docs.microsoft.com/en-us/azure/bot-service/",
+    #             )
+    #         ],
+    #     )
+    #     return CardFactory.hero_card(card)
+
+# define what we response
     async def on_message_activity(self, turn_context: TurnContext):
         response = await self.qna_maker.get_answers(turn_context)
         if response and len(response) > 0:
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
-            await turn_context.send_activity("No QnA Maker answers were found.")
+            if turn_context.activity.text == "wait":
+                return await turn_context.send_activities([
+                    Activity(
+                        type=ActivityTypes.typing
+                    ),
+                    Activity(
+                        type="delay",
+                        value=3000
+                    ),
+                    Activity(
+                        type=ActivityTypes.message,
+                        text="Finished Typing"
+                    )
+                ])
+            else:
+                re = webcrawl(turn_context.activity.text)
+                message = MessageFactory.carousel([
+                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])]))
+                    ])#, buttons=[CardAction(title='button3')
+                await turn_context.send_activity(message)
 
-        if turn_context.activity.text == "wait":
-            return await turn_context.send_activities([
-                Activity(
-                    type=ActivityTypes.typing
-                ),
-                Activity(
-                    type="delay",
-                    value=3000
-                ),
-                Activity(
-                    type=ActivityTypes.message,
-                    text="Finished Typing"
-                )
-            ])
-        else:
-            return await turn_context.send_activity(
-                f"You said {turn_context.activity.text}.  Say 'wait' to watch me type."
-            )
+                # await (
+                #     turn_context.send_activity(
+                #         MessageFactory.content_url(url= re["愛食記"][2], content_type='image/jpg', text="There's the restaurants we find"))
+                # )
+                # await (
+                #     turn_context.send_activity(
+                #         MessageFactory.text(text= re["愛食記"][0])
+                #     )
+                # )
 
+# say helllo at the beginning
     async def on_members_added_activity(
         self,
         members_added: ChannelAccount,
