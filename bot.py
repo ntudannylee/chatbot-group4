@@ -9,6 +9,7 @@ from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo 
 from sql import DB_query
 from linebot.models.sources import SourceUser
+from blogcrawler import blogcrawler
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -56,11 +57,10 @@ class MyBot(ActivityHandler):
             else:
 
                 restaurants_dict = googlemaps_API(turn_context.activity.text)
-
                 # 書文的func
 
                 re = webcrawl(turn_context.activity.text)
-                # 佑誠的func
+                # 展宏func
 
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="messageBack",title="點此看評論",text=restaurants_dict[0]['name'])])),
