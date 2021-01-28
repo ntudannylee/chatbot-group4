@@ -7,7 +7,6 @@ from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFa
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
 from websrestaurantrecom import webcrawl
 from sql import DB_query
-from get_user_id import handle_message
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -24,7 +23,6 @@ class MyBot(ActivityHandler):
                 score_threshold = 0.9
             )
         )
-        # self.user_id = handle_message()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
