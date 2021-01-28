@@ -5,7 +5,8 @@ import urllib.parse
 
 def webcrawl(usertypein):
 
-    
+    usertypein = usertypein.split("_")[0]
+
     response = requests.get("https://ifoodie.tw/explore/台北市/list/"+usertypein)
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -33,13 +34,16 @@ def webcrawl(usertypein):
         url_list.append(restaurant_post_list[a])
         url_list.append(restaurant_img_list[a])
         url_lists.append(url_list)
+    try:
+        li = []
+        li.append(restaurant_name_list[0])
+        li.append(restaurant_post_list[0])
+        li.append(restaurant_img_list[0])
+        dic = {"愛食記":li}
 
-    li = []
-    li.append(restaurant_name_list[0])
-    li.append(restaurant_post_list[0])
-    li.append(restaurant_img_list[0])
-    dic = {"愛食記":li}
+        return (dic)
+    except:
+        return False
 
-    return (dic)
 
 # print(webcrawl("一蘭拉麵"))

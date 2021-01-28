@@ -57,6 +57,26 @@ class MyBot(ActivityHandler):
                 output = DB_query("Select ID from user_info")
                 for i in range(0, len(output), 2):
                     await turn_context.send_activity(output[i] + ' ' + output[i+1])
+            elif "評論"in turn_context.activity.text:
+                await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
+                # 展宏的func
+                re = webcrawl(turn_context.activity.text)
+                # 佑誠的func
+                blog_re=[]
+                blog_re = blogcrawler(turn_context.activity.text)
+
+                review_list = []
+
+                for index in range(len(blog_re)):
+                    review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
+                                
+                if re:
+                    review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])))
+                
+                
+                message = MessageFactory.carousel(review_list)   
+                
+                await turn_context.send_activity(message)
             elif turn_context.activity.text == "get my id":
                 user_id = turn_context.activity.recipient.id
                 await turn_context.send_activity(user_id)
