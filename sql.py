@@ -21,6 +21,16 @@ def DB_query(query):
             output.append(row[j])
     return output
 
+def DB_insert(query):
+    server = 'db-chatbot.database.windows.net'
+    database = 'restaurant_DB'
+    username = 'rest-admin'
+    password = 'Chatbot4'   
+    # driver= '{ODBC Driver 17 for SQL Server}'
+    cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+    cursor = cnxn.cursor()
+    cursor.execute(query)
+
 # Some other example server values are
 # server = 'localhost\sqlexpress' # for a named instance
 # server = 'myserver,port' # to specify an alternate port
