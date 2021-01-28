@@ -65,6 +65,7 @@ class DB_function:
 #             print (str(row[0]) + " " + str(row[1]))
 #             row = cursor.fetchone()
 
+# <<<<<<< HEAD
 # server = 'dbrestaurantserver.database.windows.net'
 # database = 'dbrestaurant'
 # username = 'restadmin'
