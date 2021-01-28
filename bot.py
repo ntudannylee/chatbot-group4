@@ -25,7 +25,7 @@ class MyBot(ActivityHandler):
                 score_threshold = 0.9
             )
         )
-        self.user_id = str(SourceUser.sender_id)
+        self.user_id = str(SourceUser.sender_id())
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
