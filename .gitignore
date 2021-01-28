@@ -2,3 +2,4 @@ __init__.py
 echo-bot.zip
 __pycache__
 deploymentTemplates
+.DS_Store

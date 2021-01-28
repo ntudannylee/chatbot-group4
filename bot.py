@@ -57,9 +57,12 @@ class MyBot(ActivityHandler):
                     )
                 ])
             else:
+                # 書文的func
                 re = webcrawl(turn_context.activity.text)
+                # 佑誠的func
+
                 message = MessageFactory.carousel([
-                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往愛食記網頁",value=re["愛食記"][1])])),
                         CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
                         CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])]))
                     ])#, buttons=[CardAction(title='button3')
