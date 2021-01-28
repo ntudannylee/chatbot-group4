@@ -8,6 +8,7 @@ from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo 
 from sql import DB_query
+from linebot.models.sources import SourceUser
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -24,6 +25,7 @@ class MyBot(ActivityHandler):
                 score_threshold = 0.9
             )
         )
+        self.user_id = SourceUser.sender_id
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
@@ -49,6 +51,8 @@ class MyBot(ActivityHandler):
                 output = DB_query("Select ID from user_info")
                 for i in range(0, len(output), 2):
                     await turn_context.send_activity(output[i] + ' ' + output[i+1])
+            elif turn_context.activity.text == "get my id":
+                await turn_context.send_activity(user_id)
             else:
                 
                 restaurants_dict = googlemaps_API(turn_context.activity.text)

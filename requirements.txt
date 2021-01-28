@@ -45,3 +45,7 @@ wrapt==1.12.1
 yarl==1.6.3
 pyodbc
 line-bot-sdk
+googlemaps
+numpy
+pandas
+line-bot-sdk
