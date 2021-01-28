@@ -55,15 +55,24 @@ class MyBot(ActivityHandler):
             # elif turn_context.activity.text == "get my id":
             #     await turn_context.send_activity(self.user_id)
             elif "評論"in turn_context.activity.text:
+                await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
                 re = webcrawl(turn_context.activity.text)
                 # 佑誠的func
+                blog_re=[]
+                blog_re = blogcrawler(turn_context.activity.text)
 
-                message = MessageFactory.carousel([
-                    CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
-                    CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
-                    CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])]))
-                ])   
+                review_list = []
+
+                for index in range(len(blog_re)):
+                    review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
+                                
+                if re:
+                    review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])))
+                
+                
+                message = MessageFactory.carousel(review_list)   
+                
                 await turn_context.send_activity(message)
 
             else:
