@@ -7,7 +7,7 @@ from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFa
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo 
-from sql import DB_query, DB_insert
+from sql import DB_function
 from linebot.models.sources import SourceUser
 from blogcrawler import blogcrawler
 
@@ -26,14 +26,15 @@ class MyBot(ActivityHandler):
                 score_threshold = 0.9
             )
         )
+        self.db_func = DB_function()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
-        # id_res = DB_query('SELECT ID FROM user_info')
-        # user_id = turn_context.activity.from_property.id
-        # if user_id not in id_res:
-        #     insert_query = 'INSERT INTO user_info (ID, counter) VALUES (' + user_id + ', 0);'
-        #     DB_insert(insert_query)
+        id_res = self.db_func.DB_query('SELECT ID FROM user_info')
+        user_id = turn_context.activity.recipient.id
+        if user_id not in id_res:
+            insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (' + user_id + ', \'[]\', \'[]\', 0);'
+            self.db_func.DB_insert(insert_query)
 
         response = await self.qna_maker.get_answers(turn_context)
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
@@ -55,8 +56,8 @@ class MyBot(ActivityHandler):
                 ])
             elif turn_context.activity.text == "test sql":
                 output = DB_query("Select ID from user_info")
-                for i in range(0, len(output), 2):
-                    await turn_context.send_activity(output[i] + ' ' + output[i+1])
+                for i in range(len(output)):
+                    await turn_context.send_activity(output[i])
             elif "評論"in turn_context.activity.text:
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
@@ -117,7 +118,7 @@ class MyBot(ActivityHandler):
     ):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
-                # user_id = turn_context.activity.from_property.id
-                # insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (' + user_id + ', \'[]\', \'[]\', 0);'
-                # DB_insert(insert_query)
-                await turn_context.send_activity("Hello and welcome!")
+                user_id = turn_context.activity.recipient.id
+                insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (' + user_id + ', \'[]\', \'[]\', 0);'
+                self.db_func.DB_insert(insert_query)
+                await turn_context.send_activity("Hello and welcome! " + turn_context.activity.recipient.id)
