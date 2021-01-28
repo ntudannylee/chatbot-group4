@@ -2,13 +2,18 @@
 # Licensed under the MIT License.
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
+from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
 # from botbuilder.schema import ChannelAccount
-from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory
-from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
+from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
+from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location
-from sql import DB_query
+# from sql import DB_function
+
+from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
+from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
+
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -24,50 +29,62 @@ class MyBot(ActivityHandler):
                 score_threshold = 0.9
             )
         )
+
+        luis_application = LuisApplication(
+            config.LUIS_APP_ID,
+            config.LUIS_API_KEY,
+            "https://" + config.LUIS_API_HOST_NAME,
+        )
+        luis_options = LuisPredictionOptions(
+            include_all_intents=True, include_instance_data=True
+        )
+        self.recognizer = LuisRecognizer(luis_application, luis_options, True)
         # self.user_id = str(SourceUser.sender_id())
+        # self.db_func = DB_function()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
    
         response = await self.qna_maker.get_answers(turn_context)
+        recognizer_result = await self.recognizer.recognize(turn_context)
+        intent = LuisRecognizer.top_intent(recognizer_result)
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
-            if turn_context.activity.text == "wait":
-                return await turn_context.send_activities([
-                    Activity(
-                        type=ActivityTypes.typing
-                    ),
-                    Activity(
-                        type="delay",
-                        value=3000
-                    ),
-                    Activity(
-                        type=ActivityTypes.message,
-                        text="Finished Typing"
-                    )
-                ])
-            elif turn_context.activity.text == "test sql":
+            
+            if turn_context.activity.text == "test sql":
                 output = DB_query("Select ID from user_info")
-                for i in range(0, len(output), 2):
-                    await turn_context.send_activity(output[i] + ' ' + output[i+1])
-            # elif turn_context.activity.text == "get my id":
-            #     await turn_context.send_activity(self.user_id)
+                for i in range(len(output)):
+                    await turn_context.send_activity(output[i])
             elif "評論"in turn_context.activity.text:
+                await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
                 re = webcrawl(turn_context.activity.text)
                 # 佑誠的func
+                blog_re=[]
+                blog_re = blogcrawler(turn_context.activity.text)
 
-                message = MessageFactory.carousel([
-                    CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
-                    CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
-                    CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])]))
-                ])   
+
+                review_list = []
+
+                for index in range(len(blog_re)):
+                    review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
+                                
+                if re:
+                    review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])))
+                
+                
+                message = MessageFactory.carousel(review_list)   
+                
                 await turn_context.send_activity(message)
+
+            elif turn_context.activity.text == "get my id":
+                user_id = turn_context.activity.recipient.id
+                await turn_context.send_activity(user_id)
             
             
             # 書文的func
-            elif "吃" in turn_context.activity.text: 
+            elif intent == "使用者食物類別": 
 
                 msg = '請輸入您目前的地點或是附近的景點 🧐（例如：北車、公館）（小提示：點擊Line的+號可以傳地址上來呦!）'
        
@@ -123,7 +140,7 @@ class MyBot(ActivityHandler):
 
                 await turn_context.send_activity(message)
 
-            else:              
+            elif intent == "使用者地理位置":              
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
                           HeroCard(title='您的所在位置為：' + str(turn_context.activity.text)
@@ -135,9 +152,12 @@ class MyBot(ActivityHandler):
                 
                 ])
                 await turn_context.send_activity(message)
+            # non-type
+            else:
+                message = '不好意思，我聽不太明白，請說的具體一點'
+                await turn_context.send_activity(message)
 
-
-# say helllo at the beginning
+# say hello at the beginning
     async def on_members_added_activity(
         self,
         members_added: ChannelAccount,
@@ -145,4 +165,9 @@ class MyBot(ActivityHandler):
     ):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
-                await turn_context.send_activity("美食公道伯在此🧙‍♂️，請輸入『我要大吃特吃』以繼續")
+
+                user_id = turn_context.activity.recipient.id
+                insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (' + user_id + ', \'[]\', \'[]\', 0);'
+                # self.db_func.DB_insert(insert_query)
+                await turn_context.send_activity("美食公道伯在此🧙‍♂️，請輸入『我要大吃特吃』以繼續" + turn_context.activity.recipient.id)
+
