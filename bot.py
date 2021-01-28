@@ -6,6 +6,7 @@ from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
 from websrestaurantrecom import webcrawl
+from restaurant_recom import googlemaps_API, show_photo 
 from sql import DB_query
 from get_user_id import handle_message
 
@@ -51,14 +52,23 @@ class MyBot(ActivityHandler):
                 for i in range(0, len(output), 2):
                     await turn_context.send_activity(output[i] + ' ' + output[i+1])
             else:
+                
+                restaurants_dict = googlemaps_API(turn_context.activity.text)
+
                 # 書文的func
+
                 re = webcrawl(turn_context.activity.text)
                 # 佑誠的func
 
                 message = MessageFactory.carousel([
-                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往愛食記網頁",value=re["愛食記"][1])])),
-                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
-                        CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])]))
+                        CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1]),CardAction(type="messageBack",title="點此看評論",text=restaurants_dict[0]['name'])])),
+                        CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        CardFactory.hero_card(HeroCard(title=restaurants_dict[2]['name'], images=[CardImage(url=show_photo(restaurants_dict[2]['photo_reference']))], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        CardFactory.hero_card(HeroCard(title=restaurants_dict[3]['name'], images=[CardImage(url=show_photo(restaurants_dict[3]['photo_reference']))], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        CardFactory.hero_card(HeroCard(title=restaurants_dict[4]['name'], images=[CardImage(url=show_photo(restaurants_dict[4]['photo_reference']))], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])]))
+                        # CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        # CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])),
+                        # CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])]))
                     ])#, buttons=[CardAction(title='button3')
                 await turn_context.send_activity(message)
 
