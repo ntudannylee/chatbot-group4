@@ -3,13 +3,13 @@
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 # from botbuilder.schema import ChannelAccount
-from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory
+from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, ShowTypingMiddleware
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo 
 from sql import DB_query
 from linebot.models.sources import SourceUser
-from blogcrawler import blogcrawler
+
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -34,21 +34,8 @@ class MyBot(ActivityHandler):
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
-            if turn_context.activity.text == "wait":
-                await turn_context.send_activities([
-                    Activity(
-                        type=ActivityTypes.typing
-                    ),
-                    Activity(
-                        type="delay",
-                        value=3000
-                    ),
-                    Activity(
-                        type=ActivityTypes.message,
-                        text="Finished Typing"
-                    )
-                ])
-            elif turn_context.activity.text == "test sql":
+            
+            if turn_context.activity.text == "test sql":
                 output = DB_query("Select ID from user_info")
                 for i in range(0, len(output), 2):
                     await turn_context.send_activity(output[i] + ' ' + output[i+1])
