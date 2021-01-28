@@ -16,16 +16,18 @@ import time
 
 start = time.time()
 
-blog_from=[]
-name_list=[]
-post_url_list=[]
-img_url_list=[]
-name_url_lists = []
+
 
 def blogcrawler(search_name):
     
+    search_name = search_name.split("_")[0]
 
 
+    blog_from=[]
+    name_list=[]
+    post_url_list=[]
+    img_url_list=[]
+    name_url_lists = []
     #====周花花====
     web = 'https://tenjo.tw/?s='+'台北 '+ str(search_name)
     
@@ -104,7 +106,7 @@ def blogcrawler(search_name):
             blog_from.append('艾妮可')
             name_list.append(data.text)
             post_url_list.append(data.get('href'))
-            img_url_list.append('https://www.flaticon.com/svg/vstatic/svg/3959/3959542.svg?token=exp=1611825809~hmac=961c79bb10a0600c9b7b752a92787eda')
+            img_url_list.append('https://image.freepik.com/free-photo/woman-making-photo-meal-her-phone_1303-18328.jpg')
             count+=1
     
         
@@ -132,7 +134,7 @@ def blogcrawler(search_name):
             name_list.append(data.text)
             #print(data.get('href'))
             post_url_list.append(data.get('href'))
-            img_url_list.append('https://www.flaticon.com/svg/vstatic/svg/3959/3959542.svg?token=exp=1611825809~hmac=961c79bb10a0600c9b7b752a92787eda')
+            img_url_list.append('https://image.freepik.com/free-photo/making-photograph-english-breakfast_144627-43701.jpg')
             count+=1
        
     for a in range(len(name_list)):
