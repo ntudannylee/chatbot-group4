@@ -25,7 +25,7 @@ class MyBot(ActivityHandler):
                 score_threshold = 0.9
             )
         )
-        self.user_id = str(SourceUser.sender_id())
+        # self.user_id = str(SourceUser.sender_id())
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
@@ -51,8 +51,8 @@ class MyBot(ActivityHandler):
                 output = DB_query("Select ID from user_info")
                 for i in range(0, len(output), 2):
                     await turn_context.send_activity(output[i] + ' ' + output[i+1])
-            elif turn_context.activity.text == "get my id":
-                await turn_context.send_activity(user_id)
+            # elif turn_context.activity.text == "get my id":
+            #     await turn_context.send_activity(self.user_id)
             else:
 
                 restaurants_dict = googlemaps_API(turn_context.activity.text)
