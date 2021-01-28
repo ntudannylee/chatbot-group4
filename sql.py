@@ -12,10 +12,6 @@ def DB_query(query):
     row = cursor.fetchone()
     result = []
     while row:
-        # # print(row[0], row[1], row[2])
-        # result.append(row.ID)
-        # result.append(row.recently)
-        # result.append(row.favorite)
         result.append(row)
         row = cursor.fetchone()
     output = []

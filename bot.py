@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 from flask import Config
-from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint
+from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 # from botbuilder.schema import ChannelAccount
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
@@ -17,30 +17,15 @@ class MyBot(ActivityHandler):
                 knowledge_base_id=config.QNA_KNOWLEDGEBASE_ID,
                 endpoint_key=config.QNA_ENDPOINT_KEY,
                 host=config.QNA_ENDPOINT_HOST,
+            ), QnAMakerOptions(
+                score_threshold = 0.9
             )
         )
-    # def create_hero_card(self) -> Attachment:
-    #     card = HeroCard(
-    #         title="",
-    #         images=[
-    #             CardImage(
-    #                 url="https://sec.ch9.ms/ch9/7ff5/e07cfef0-aa3b-40bb-9baa-7c9ef8ff7ff5/buildreactionbotframework_960.jpg"
-    #             )
-    #         ],
-    #         buttons=[
-    #             CardAction(
-    #                 type=ActionTypes.open_url,
-    #                 title="Get Started",
-    #                 value="https://docs.microsoft.com/en-us/azure/bot-service/",
-    #             )
-    #         ],
-    #     )
-    #     return CardFactory.hero_card(card)
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
         response = await self.qna_maker.get_answers(turn_context)
-        if response and len(response) > 0:
+        if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
             if turn_context.activity.text == "wait":
