@@ -46,7 +46,7 @@ class MyBot(ActivityHandler):
         id_res = self.db_func.DB_query('SELECT ID FROM user_info')
         user_id = turn_context.activity.recipient.id
         if user_id not in id_res:
-            insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (' + user_id + ', \'[]\', \'[]\', 0);'
+            insert_query = 'INSERT INTO user_info (ID, counter) VALUES (\'' + user_id + '\', 0);'
             self.db_func.DB_insert(insert_query)
 
         response = await self.qna_maker.get_answers(turn_context)
@@ -132,6 +132,8 @@ class MyBot(ActivityHandler):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
                 user_id = turn_context.activity.recipient.id
-                insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (' + user_id + ', \'[]\', \'[]\', 0);'
+                # print(type(user_id))
+                insert_query = 'INSERT INTO user_info (ID, counter) VALUES (\'' + user_id + '\', 0);'
+                # print(insert_query)
                 self.db_func.DB_insert(insert_query)
                 await turn_context.send_activity("Hello and welcome! " + turn_context.activity.recipient.id)
