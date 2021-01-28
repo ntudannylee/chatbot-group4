@@ -58,7 +58,7 @@ class MyBot(ActivityHandler):
                 for i in range(0, len(output), 2):
                     await turn_context.send_activity(output[i] + ' ' + output[i+1])
             elif turn_context.activity.text == "get my id":
-                user_id = turn_context.activity.from_property.id
+                user_id = turn_context.activity.recipient.id
                 await turn_context.send_activity(user_id)
             else:
 
@@ -97,7 +97,7 @@ class MyBot(ActivityHandler):
     ):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
-                user_id = turn_context.activity.from_property.id
-                insert_query = 'INSERT INTO user_info (ID, counter) VALUES (' + user_id + ', 0);'
-                DB_insert(insert_query)
+                # user_id = turn_context.activity.from_property.id
+                # insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (' + user_id + ', \'[]\', \'[]\', 0);'
+                # DB_insert(insert_query)
                 await turn_context.send_activity("Hello and welcome!")
