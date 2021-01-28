@@ -3,12 +3,11 @@
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
-# from botbuilder.schema import ChannelAccount
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location
-# from sql import DB_function
+from sql import DB_function
 
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
@@ -40,7 +39,7 @@ class MyBot(ActivityHandler):
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
         # self.user_id = str(SourceUser.sender_id())
-        # self.db_func = DB_function()
+        self.db_func = DB_function()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
@@ -55,12 +54,7 @@ class MyBot(ActivityHandler):
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
-            
-            if turn_context.activity.text == "test sql":
-                output = DB_query("Select ID from user_info")
-                for i in range(len(output)):
-                    await turn_context.send_activity(output[i])
-            elif "評論"in turn_context.activity.text:
+            if "評論"in turn_context.activity.text:
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
                 re = webcrawl(turn_context.activity.text)
@@ -173,4 +167,4 @@ class MyBot(ActivityHandler):
                 insert_query = 'INSERT INTO user_info (ID, counter) VALUES (\'' + user_id + '\', 0);'
                 # print(insert_query)
                 self.db_func.DB_insert(insert_query)
-                await turn_context.send_activity("美食公道伯在此🧙‍♂️，請輸入『我要大吃特吃』以繼續" + turn_context.activity.recipient.id)
+                await turn_context.send_activity("美食公道伯在此🧙‍♂️，請輸入『我要大吃特吃』以繼續")
