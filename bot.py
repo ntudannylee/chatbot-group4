@@ -29,10 +29,10 @@ class MyBot(ActivityHandler):
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
-        id_res = DB_query('SELECT ID FROM user_info')
-        if turn_context.activity.from_property.id not in id_res:
-            insert_query = 'INSERT INTO user_info (ID, counter) VALUES (' + user_id + ', 0);'
-            DB_insert(insert_query)
+        # id_res = DB_query('SELECT ID FROM user_info')
+        # if turn_context.activity.from_property.id not in id_res:
+        #     insert_query = 'INSERT INTO user_info (ID, counter) VALUES (' + user_id + ', 0);'
+        #     DB_insert(insert_query)
 
         response = await self.qna_maker.get_answers(turn_context)
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
