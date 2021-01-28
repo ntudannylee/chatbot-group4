@@ -1,13 +1,14 @@
 import pyodbc
 
+server = 'db-chatbot.database.windows.net'
+database = 'restaurant_DB'
+username = 'rest-admin'
+password = 'Chatbot4'   
+# driver= '{ODBC Driver 17 for SQL Server}'
+cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+cursor = cnxn.cursor()
+
 def DB_query(query):
-    server = 'db-chatbot.database.windows.net'
-    database = 'restaurant_DB'
-    username = 'rest-admin'
-    password = 'Chatbot4'   
-    # driver= '{ODBC Driver 17 for SQL Server}'
-    cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-    cursor = cnxn.cursor()
     cursor.execute(query)
     row = cursor.fetchone()
     result = []
@@ -22,13 +23,13 @@ def DB_query(query):
     return output
 
 def DB_insert(query):
-    server = 'db-chatbot.database.windows.net'
-    database = 'restaurant_DB'
-    username = 'rest-admin'
-    password = 'Chatbot4'   
-    # driver= '{ODBC Driver 17 for SQL Server}'
-    cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-    cursor = cnxn.cursor()
+    # server = 'db-chatbot.database.windows.net'
+    # database = 'restaurant_DB'
+    # username = 'rest-admin'
+    # password = 'Chatbot4'   
+    # # driver= '{ODBC Driver 17 for SQL Server}'
+    # cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+    # cursor = cnxn.cursor()
     cursor.execute(query)
 
 # Some other example server values are
