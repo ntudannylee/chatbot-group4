@@ -1,6 +1,4 @@
 import pyodbc
-import sys
-import traceback
 
 class DB_function:
 
@@ -45,6 +43,17 @@ class DB_function:
         # cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
         # cursor = cnxn.cursor()
         self.cursor.execute(query)
+        return 'OK'
+    
+    def DB_commit(self):
+        # server = 'db-chatbot.database.windows.net'
+        # database = 'restaurant_DB'
+        # username = 'rest-admin'
+        # password = 'Chatbot4'   
+        # # driver= '{ODBC Driver 17 for SQL Server}'
+        # cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+        # cursor = cnxn.cursor()
+        self.cursor.execute('COMMIT')
 
 # Some other example server values are
 # server = 'localhost\sqlexpress' # for a named instance
@@ -64,24 +73,3 @@ class DB_function:
 #         while row:
 #             print (str(row[0]) + " " + str(row[1]))
 #             row = cursor.fetchone()
-
-# <<<<<<< HEAD
-# server = 'dbrestaurantserver.database.windows.net'
-# database = 'dbrestaurant'
-# username = 'restadmin'
-# password = 'Chatbot4'   
-# # driver= '{ODBC Driver 17 for SQL Server}'
-# # try:
-# # print(pyodbc.drivers())
-# cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-# cnxn = pyodbc.connect(DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-# except Exception as e:
-#     error_class = e.__class__.__name__ #取得錯誤類型
-#     detail = e.args[0] #取得詳細內容
-#     cl, exc, tb = sys.exc_info() #取得Call Stack
-#     lastCallStack = traceback.extract_tb(tb)[-1] #取得Call Stack的最後一筆資料
-#     fileName = lastCallStack[0] #取得發生的檔案名稱
-#     lineNum = lastCallStack[1] #取得發生的行號
-#     funcName = lastCallStack[2] #取得發生的函數名稱
-#     errMsg = "File \"{}\", line {}, in {}: [{}] {}".format(fileName, lineNum, funcName, error_class, detail)
-#     print(errMsg)

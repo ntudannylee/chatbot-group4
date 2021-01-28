@@ -8,7 +8,6 @@ from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, A
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location
 from sql import DB_function
-
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
@@ -38,19 +37,27 @@ class MyBot(ActivityHandler):
             include_all_intents=True, include_instance_data=True
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
-        # self.user_id = str(SourceUser.sender_id())
         self.db_func = DB_function()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
+        ## DB insert old user
         id_res = self.db_func.DB_query('SELECT ID FROM user_info')
+        print(id_res)
         user_id = turn_context.activity.recipient.id
         if user_id not in id_res:
-            insert_query = 'INSERT INTO user_info (ID, counter) VALUES (\'' + user_id + '\', 0);'
+            insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (\'' + user_id + '\', \'[]\', \'[]\', 0);'
             self.db_func.DB_insert(insert_query)
+            self.db_func.DB_commit()
+
+        ## QnA Maker's response
         response = await self.qna_maker.get_answers(turn_context)
+
+        ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
         intent = LuisRecognizer.top_intent(recognizer_result)
+
+        ## get user input and make response
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
@@ -163,8 +170,12 @@ class MyBot(ActivityHandler):
     ):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
+                ## DB insert new user
+                id_res = self.db_func.DB_query('SELECT ID FROM user_info')
+                print(id_res)
                 user_id = turn_context.activity.recipient.id
-                insert_query = 'INSERT INTO user_info (ID, counter) VALUES (\'' + user_id + '\', 0);'
-                # print(insert_query)
-                self.db_func.DB_insert(insert_query)
+                if user_id not in id_res:
+                    insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (\'' + user_id + '\', \'[]\', \'[]\', 0);'
+                    self.db_func.DB_insert(insert_query)
+                    self.db_func.DB_commit()
                 await turn_context.send_activity("美食公道伯在此🧙‍♂️，請輸入『我要大吃特吃』以繼續")
