@@ -8,6 +8,7 @@ from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, A
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location
 from sql import DB_function
+from favorite import my_favorite
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
@@ -38,12 +39,12 @@ class MyBot(ActivityHandler):
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
         self.db_func = DB_function()
+        self.favor = my_favorite()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
         ## DB insert old user
         id_res = self.db_func.DB_query('SELECT ID FROM user_info')
-        print(id_res)
         user_id = turn_context.activity.recipient.id
         if user_id not in id_res:
             insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (\'' + user_id + '\', \'[]\', \'[]\', 0);'
@@ -61,6 +62,8 @@ class MyBot(ActivityHandler):
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
+            # if turn_context.activity.text == '我的最愛':
+                
             if "評論"in turn_context.activity.text:
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
@@ -71,23 +74,14 @@ class MyBot(ActivityHandler):
 
 
                 review_list = []
-
                 for index in range(len(blog_re)):
                     review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
                                 
                 if re:
                     review_list.append(CardFactory.hero_card(HeroCard(title=re["愛食記"][0], images=[CardImage(url=re["愛食記"][2])], buttons=[CardAction(type="openUrl",title="前往網頁",value=re["愛食記"][1])])))
-                
-                
-                message = MessageFactory.carousel(review_list)   
-                
-                await turn_context.send_activity(message)
 
-            elif turn_context.activity.text == "get my id":
-                user_id = turn_context.activity.recipient.id
-                await turn_context.send_activity(user_id)
-            
-            
+                message = MessageFactory.carousel(review_list)                   
+                await turn_context.send_activity(message)
             # 書文的func
             elif intent == "使用者食物類別": 
 
@@ -158,6 +152,8 @@ class MyBot(ActivityHandler):
                 ])
                 await turn_context.send_activity(message)
             # non-type
+            elif turn_context.activity.text == 'get id':
+                await turn_context.send_activity(turn_context.activity.recipient.id)
             else:
                 message = '不好意思，我聽不太明白，請說的具體一點'
                 await turn_context.send_activity(message)
@@ -172,7 +168,6 @@ class MyBot(ActivityHandler):
             if member_added.id != turn_context.activity.recipient.id:
                 ## DB insert new user
                 id_res = self.db_func.DB_query('SELECT ID FROM user_info')
-                print(id_res)
                 user_id = turn_context.activity.recipient.id
                 if user_id not in id_res:
                     insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (\'' + user_id + '\', \'[]\', \'[]\', 0);'
