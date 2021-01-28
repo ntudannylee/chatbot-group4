@@ -1,4 +1,4 @@
-# echo-bot
+# echo-bot danny
 
 A bot that echoes back user response.
 
