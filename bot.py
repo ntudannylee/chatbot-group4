@@ -4,11 +4,12 @@ from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 # from botbuilder.schema import ChannelAccount
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, UserState
-from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
+from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo 
 from sql import DB_query, DB_insert
 from linebot.models.sources import SourceUser
+from blogcrawler import blogcrawler
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -33,7 +34,7 @@ class MyBot(ActivityHandler):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
             if turn_context.activity.text == "wait":
-                return await turn_context.send_activities([
+                await turn_context.send_activities([
                     Activity(
                         type=ActivityTypes.typing
                     ),
@@ -56,11 +57,9 @@ class MyBot(ActivityHandler):
             else:
 
                 restaurants_dict = googlemaps_API(turn_context.activity.text)
-
                 # 書文的func
 
                 re = webcrawl(turn_context.activity.text)
-                # 佑誠的func
 
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="messageBack",title="點此看評論",text=restaurants_dict[0]['name'])])),
