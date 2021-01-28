@@ -4,7 +4,7 @@ from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 # from botbuilder.schema import ChannelAccount
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory
-from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction
+from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo 
 from sql import DB_query
@@ -35,7 +35,7 @@ class MyBot(ActivityHandler):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
             if turn_context.activity.text == "wait":
-                return await turn_context.send_activities([
+                await turn_context.send_activities([
                     Activity(
                         type=ActivityTypes.typing
                     ),
