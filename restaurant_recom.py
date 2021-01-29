@@ -1,7 +1,5 @@
 import googlemaps
-import opendata
-# 餐具友善餐廳列表
-good_list = opendata.get_data()
+
 # Client initialization
 API_key = 'AIzaSyAPtgFF8msgOfa_CK_FevErxHxH6HGZ8EM'
 gmaps = googlemaps.Client(key=API_key)
@@ -87,16 +85,18 @@ def googlemaps_API(place, money_status, food_type):
 
     return restaurants
 
-def find_position_with_xy(place):
-    geocode_result = gmaps.geocode(place)
-    if geocode_result:
-        return geocode_result[0]['formatted_address']
+# def find_position_with_xy(place):
+#     geocode_result = gmaps.geocode(place)
+#     if geocode_result:
+#         return geocode_result[0]['formatted_address']
 
 # show photo of restaurant
 def show_photo(ref):
     url = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference='+ ref +'&key='+API_key
     return url
 
+
+## for history and favorite
 def find_position_with_xy(place):
     geocode_result = gmaps.geocode(place)
     if geocode_result:
