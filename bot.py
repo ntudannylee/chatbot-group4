@@ -247,6 +247,7 @@ class MyBot(ActivityHandler):
                                                 images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
                                                 buttons=[CardAction(type="openUrl",title="地圖",
                                                 value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"), 
                                                 CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
                                                 CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
                                             )
@@ -260,6 +261,7 @@ class MyBot(ActivityHandler):
                                                 images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
                                                 buttons=[CardAction(type="openUrl",title="地圖",
                                                 value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"),
                                                 CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
                                                 CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
                                             )
@@ -273,6 +275,7 @@ class MyBot(ActivityHandler):
                                                 images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
                                                 buttons=[CardAction(type="openUrl",title="地圖",
                                                 value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"),
                                                 CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
                                                 CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
                                             )
@@ -286,6 +289,7 @@ class MyBot(ActivityHandler):
                                                 images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
                                                 buttons=[CardAction(type="openUrl",title="地圖",
                                                 value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"),
                                                 CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
                                                 CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
                                             )
