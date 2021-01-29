@@ -46,6 +46,7 @@ class MyBot(ActivityHandler):
             include_all_intents=True, include_instance_data=True
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
+
         self.db_func = DB_function()
         self.favor = my_favorite()
         self.history = history()
@@ -99,22 +100,12 @@ class MyBot(ActivityHandler):
                     HeroCard(
                     subtitle= '請選擇您想吃的類型： 😗'
                     , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-<<<<<<< HEAD
                     , CardAction(type="imBack",title="牛排",value="我想吃牛排")
                     , CardAction(type="imBack",title="素食",value="我想吃素食")]
-=======
-                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
->>>>>>> 9fc4b8258fa1b89a4c99e68a7e0a86bc483d2cac
                     ))
                 ])
                 await turn_context.send_activity(message)
                 print('entity:', entity)
-        if luis_result.entities:
-            entities_list = ",".join(
-                [entity_obj.entity for entity_obj in luis_result.entities]
-            )
-            print(entities_list)
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
@@ -155,8 +146,7 @@ class MyBot(ActivityHandler):
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=url)]))
                 ])                   
-                await turn_context.send_activity(message) 
-                    
+                await turn_context.send_activity(message)
             elif "評論"in turn_context.activity.text:
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
@@ -164,7 +154,7 @@ class MyBot(ActivityHandler):
                 # 佑誠的func
                 blog_re=[]
                 blog_re = blogcrawler(turn_context.activity.text)
-                
+
 
                 review_list = []
                 for index in range(len(blog_re)):
@@ -177,7 +167,6 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(review_list)   
                 else:
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
-
                 rest_name = turn_context.activity.text.split("_")[0]
                 self.history.add_history(user_id, rest_name)
 
@@ -213,6 +202,9 @@ class MyBot(ActivityHandler):
                 ])
                 await turn_context.send_activity(message)
 
+
+            elif "^" in entity:
+                
 
             elif('_$' in turn_context.activity.text):
                 money_status = 1
@@ -253,12 +245,15 @@ class MyBot(ActivityHandler):
                         )
                         if(i>10):
                             break
-                    
 
-                # await turn_context.send_activity(message)
-
+                    message = MessageFactory.carousel(restaurants_list)                   
+                    await turn_context.send_activity(message)
+                
             elif turn_context.activity.address!='':
                 turn_context.send_activity(turn_context.activity.address)
+                
+            elif turn_context.activity.text == 'get id':
+                await turn_context.send_activity(turn_context.activity.recipient.id)
             # non-type
             else:
                 message = '不好意思，我聽不太明白，請說的具體一點'
