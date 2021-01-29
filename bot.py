@@ -65,12 +65,45 @@ class MyBot(ActivityHandler):
 
         ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
-    # parse intent and entity 
+        # parse intent and entity 
         intent = LuisRecognizer.top_intent(recognizer_result)
-        entity='steak'
-        entity_address='台北車站'
+        print(intent)
         ## get user input and make response
         luis_result = recognizer_result.properties["luisResult"]
+        entity=''
+        if('我想吃咖啡廳' == turn_context.activity.text):
+            entity='咖啡廳'
+        if('我想吃牛排' == turn_context.activity.text):
+            entity='牛排'
+        if('我想吃素食' == turn_context.activity.text):
+            entity='素食'
+
+        if luis_result.entities:
+            entities_list =[]
+            for ll in luis_result.entities:
+                # print(ll.entity)
+                entities_list.append(ll.entity)
+            # entities_list = "".join(
+            #     [entity_obj.entity for entity_obj in luis_result.entities]
+            # )
+            print(entities_list)
+            print(len(entities_list))
+            if len(entities_list) == 1:
+                entity = entities_list[0]
+        else:
+            if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
+                await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(
+                    HeroCard(
+                    subtitle= '請選擇您想吃的類型： 😗'
+                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
+                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
+                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
+                    ))
+                ])
+                await turn_context.send_activity(message)
+                print('entity:', entity)
         if luis_result.entities:
             entities_list = ",".join(
                 [entity_obj.entity for entity_obj in luis_result.entities]
@@ -155,11 +188,11 @@ class MyBot(ActivityHandler):
             elif intent == "使用者地理位置" and "_$" not in turn_context.activity.text:              
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
-                        HeroCard(title='您的所在位置為：' + str(entity_address)
+                        HeroCard(title='您的所在位置為：' + str(entity)
                         , subtitle= '請選擇您的預算區間： 🤑'
-                        , buttons=[CardAction(type="imBack",title="$$$",value="我在" + str(entity_address) + "_$$$")
-                        , CardAction(type="imBack",title="$$",value="我在" + str(entity_address) + "_$$")
-                        , CardAction(type="imBack",title="$",value="我在" + str(entity_address) + "_$")]
+                        , buttons=[CardAction(type="imBack",title="$$$",value="我在" + str(entity) + "_$$$")
+                        , CardAction(type="imBack",title="$$",value="我在" + str(entity) + "_$$")
+                        , CardAction(type="imBack",title="$",value="我在" + str(entity) + "_$")]
                         ))
                 ])
                 await turn_context.send_activity(message)
@@ -187,40 +220,59 @@ class MyBot(ActivityHandler):
                 # 沒有餐廳的狀況
                 if(len(restaurants_dict) == 0):
                     message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+                else:
+                    restaurants_list=[]
+                    for i in range(len(restaurants_dict)):
+                        restaurants_list.append(
+                            CardFactory.hero_card(
+                                HeroCard(
+                                    title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
+                                    images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                    buttons=[CardAction(type="openUrl",title="地圖",
+                                    value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                    CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                )
+                            )
+                        )
+                        if(i>10):
+                            break
 
-                elif(len(restaurants_dict) >= 5):
-                    message = MessageFactory.carousel([
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[2]['name'], text='推薦指數 : ' + str(restaurants_dict[2]['rating']), images=[CardImage(url=show_photo(restaurants_dict[2]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[2]['location_x']) + "," + str(restaurants_dict[2]['location_y']) +"&query_place_id="+str(restaurants_dict[2]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[2]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[2]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[3]['name'], text='推薦指數 : ' + str(restaurants_dict[3]['rating']), images=[CardImage(url=show_photo(restaurants_dict[3]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[3]['location_x']) + "," + str(restaurants_dict[3]['location_y']) +"&query_place_id="+str(restaurants_dict[3]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[3]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[3]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[4]['name'], text='推薦指數 : ' + str(restaurants_dict[4]['rating']), images=[CardImage(url=show_photo(restaurants_dict[4]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[4]['location_x']) + "," + str(restaurants_dict[4]['location_y']) +"&query_place_id="+str(restaurants_dict[4]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[4]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[4]['name']+"_加入最愛")])),
-                    ])
-                elif len(restaurants_dict) == 4:
-                    message = MessageFactory.carousel([
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[2]['name'], text='推薦指數 : ' + str(restaurants_dict[2]['rating']), images=[CardImage(url=show_photo(restaurants_dict[2]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[2]['location_x']) + "," + str(restaurants_dict[2]['location_y']) +"&query_place_id="+str(restaurants_dict[2]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[2]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[2]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[3]['name'], text='推薦指數 : ' + str(restaurants_dict[3]['rating']), images=[CardImage(url=show_photo(restaurants_dict[3]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[3]['location_x']) + "," + str(restaurants_dict[3]['location_y']) +"&query_place_id="+str(restaurants_dict[3]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[3]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[3]['name']+"_加入最愛")])),
-                    ])
-                elif len(restaurants_dict) == 3:
-                    message = MessageFactory.carousel([
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[2]['name'], text='推薦指數 : ' + str(restaurants_dict[2]['rating']), images=[CardImage(url=show_photo(restaurants_dict[2]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[2]['location_x']) + "," + str(restaurants_dict[2]['location_y']) +"&query_place_id="+str(restaurants_dict[2]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[2]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[2]['name']+"_加入最愛")])),
-                    ])
-                elif len(restaurants_dict) == 2:
-                    message = MessageFactory.carousel([
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
-                    ])
-                elif len(restaurants_dict) == 1:
-                    message = MessageFactory.carousel([
-                            CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
-                    ])
+                    message = MessageFactory.carousel(restaurants_list)                   
+                    await turn_context.send_activity(message)
+                # elif (len(restaurants_dict) >= 5):
+                #     message = MessageFactory.carousel([
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[2]['name'], text='推薦指數 : ' + str(restaurants_dict[2]['rating']), images=[CardImage(url=show_photo(restaurants_dict[2]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[2]['location_x']) + "," + str(restaurants_dict[2]['location_y']) +"&query_place_id="+str(restaurants_dict[2]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[2]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[2]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[3]['name'], text='推薦指數 : ' + str(restaurants_dict[3]['rating']), images=[CardImage(url=show_photo(restaurants_dict[3]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[3]['location_x']) + "," + str(restaurants_dict[3]['location_y']) +"&query_place_id="+str(restaurants_dict[3]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[3]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[3]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[4]['name'], text='推薦指數 : ' + str(restaurants_dict[4]['rating']), images=[CardImage(url=show_photo(restaurants_dict[4]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[4]['location_x']) + "," + str(restaurants_dict[4]['location_y']) +"&query_place_id="+str(restaurants_dict[4]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[4]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[4]['name']+"_加入最愛")])),
+                #     ])
+                # elif len(restaurants_dict) == 4:
+                #     message = MessageFactory.carousel([
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[2]['name'], text='推薦指數 : ' + str(restaurants_dict[2]['rating']), images=[CardImage(url=show_photo(restaurants_dict[2]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[2]['location_x']) + "," + str(restaurants_dict[2]['location_y']) +"&query_place_id="+str(restaurants_dict[2]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[2]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[2]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[3]['name'], text='推薦指數 : ' + str(restaurants_dict[3]['rating']), images=[CardImage(url=show_photo(restaurants_dict[3]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[3]['location_x']) + "," + str(restaurants_dict[3]['location_y']) +"&query_place_id="+str(restaurants_dict[3]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[3]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[3]['name']+"_加入最愛")])),
+                #     ])
+                # elif len(restaurants_dict) == 3:
+                #     message = MessageFactory.carousel([
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[2]['name'], text='推薦指數 : ' + str(restaurants_dict[2]['rating']), images=[CardImage(url=show_photo(restaurants_dict[2]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[2]['location_x']) + "," + str(restaurants_dict[2]['location_y']) +"&query_place_id="+str(restaurants_dict[2]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[2]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[2]['name']+"_加入最愛")])),
+                #     ])
+                # elif len(restaurants_dict) == 2:
+                #     message = MessageFactory.carousel([
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[1]['name'], text='推薦指數 : ' + str(restaurants_dict[1]['rating']), images=[CardImage(url=show_photo(restaurants_dict[1]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[1]['location_x']) + "," + str(restaurants_dict[1]['location_y']) +"&query_place_id="+str(restaurants_dict[1]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[1]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[1]['name']+"_加入最愛")])),
+                #     ])
+                # elif len(restaurants_dict) == 1:
+                #     message = MessageFactory.carousel([
+                #             CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
+                #     ])
                     
 
-                await turn_context.send_activity(message)
+                # await turn_context.send_activity(message)
 
             elif turn_context.activity.address!='':
                 turn_context.send_activity(turn_context.activity.address)
