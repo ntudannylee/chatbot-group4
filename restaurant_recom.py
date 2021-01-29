@@ -85,10 +85,10 @@ def googlemaps_API(place, money_status, food_type):
 
     return restaurants
 
-def find_position_with_xy(place):
-    geocode_result = gmaps.geocode(place)
-    if geocode_result:
-        return geocode_result[0]['formatted_address']
+# def find_position_with_xy(place):
+#     geocode_result = gmaps.geocode(place)
+#     if geocode_result:
+#         return geocode_result[0]['formatted_address']
 
 # show photo of restaurant
 def show_photo(ref):
@@ -99,3 +99,15 @@ def find_position_with_xy(place):
     geocode_result = gmaps.geocode(place)
     if geocode_result:
         return geocode_result[0]['formatted_address']
+# find_position_with_xy((40.714224, -73.961452))
+
+# def find_keywords_name(ref):, 
+#     location = (25.046273, 121.517498)
+#     radius = 10000    #1km
+#     result = gmaps.places_nearby(location, radius, keyword, type=place_type, language='zh-TW')
+
+#     url ='https://maps.googleapis.com/maps/api/place/findplacefromtext/output?%s&key=%s'%(ref,API_key)
+#     googlemaps
+#     return url
+
+# print(find_keywords_name("薑母鴨"))
