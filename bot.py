@@ -3,9 +3,6 @@
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
-
-from botbuilder.schema import ChannelAccount
-
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
@@ -222,10 +219,12 @@ class MyBot(ActivityHandler):
                     msg = msg.replace('_$$$', '')
                 msg = msg.replace('_$', '')
                 msg = msg.replace('我想吃', '')
+                msg = msg.replace('我在', '')
                 if(intent == '使用者食物類別'):
                     restaurants_dict = googlemaps_API("北車", money_status, msg)
                     print(restaurants_dict)
                 if(intent == '使用者地理位置'):
+                    print('123123')
                     restaurants_dict = googlemaps_API(msg, money_status, '')
                 print('money_status:', money_status)
                 print('msg:', msg)
