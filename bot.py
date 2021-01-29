@@ -3,9 +3,6 @@
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
-
-from botbuilder.schema import ChannelAccount
-
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
@@ -47,6 +44,7 @@ class MyBot(ActivityHandler):
             include_all_intents=True, include_instance_data=True
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
+
         self.db_func = DB_function()
         self.favor = my_favorite()
         self.history = history()
@@ -86,13 +84,12 @@ class MyBot(ActivityHandler):
             for ll in luis_result.entities:
                 # print(ll.entity)
                 entities_list.append(ll.entity)
-            # entities_list = "".join(
-            #     [entity_obj.entity for entity_obj in luis_result.entities]
-            # )
             print(entities_list)
             print(len(entities_list))
             if len(entities_list) == 1:
                 entity = entities_list[0]
+            else:
+                entity = str(entities_list[0]+'^'+entities_list[1])
         else:
             if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
                 await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
@@ -101,17 +98,12 @@ class MyBot(ActivityHandler):
                     HeroCard(
                     subtitle= '請選擇您想吃的類型： 😗'
                     , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
+                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
+                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
                     ))
                 ])
                 await turn_context.send_activity(message)
                 print('entity:', entity)
-        if luis_result.entities:
-            entities_list = ",".join(
-                [entity_obj.entity for entity_obj in luis_result.entities]
-            )
-            print(entities_list)
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
@@ -152,8 +144,7 @@ class MyBot(ActivityHandler):
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=url)]))
                 ])                   
-                await turn_context.send_activity(message) 
-                    
+                await turn_context.send_activity(message)
             elif "評論"in turn_context.activity.text:
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
@@ -161,7 +152,7 @@ class MyBot(ActivityHandler):
                 # 佑誠的func
                 blog_re=[]
                 blog_re = blogcrawler(turn_context.activity.text)
-                
+
 
                 review_list = []
                 for index in range(len(blog_re)):
@@ -174,7 +165,6 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(review_list)   
                 else:
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
-
                 rest_name = turn_context.activity.text.split("_")[0]
                 self.history.add_history(user_id, rest_name)
 
@@ -211,6 +201,9 @@ class MyBot(ActivityHandler):
                 await turn_context.send_activity(message)
 
 
+            # elif "^" in entity:
+                
+
             elif('_$' in turn_context.activity.text):
                 money_status = 1
                 msg = turn_context.activity.text    
@@ -223,10 +216,12 @@ class MyBot(ActivityHandler):
                     msg = msg.replace('_$$$', '')
                 msg = msg.replace('_$', '')
                 msg = msg.replace('我想吃', '')
+                msg = msg.replace('我在', '')
                 if(intent == '使用者食物類別'):
                     restaurants_dict = googlemaps_API("北車", money_status, msg)
                     print(restaurants_dict)
                 if(intent == '使用者地理位置'):
+                    print('123123')
                     restaurants_dict = googlemaps_API(msg, money_status, '')
                 print('money_status:', money_status)
                 print('msg:', msg)
@@ -298,10 +293,10 @@ class MyBot(ActivityHandler):
 
                         if(i>10):
                             break
-                    
 
-                # await turn_context.send_activity(message)
-
+                    message = MessageFactory.carousel(restaurants_list)                   
+                    await turn_context.send_activity(message)
+                
             elif turn_context.activity.address!='':
                 turn_context.send_activity(turn_context.activity.address)
                 
