@@ -72,8 +72,3 @@ class DB_function:
 #         row = cursor.fetchone()
 #         while row:
 #             print (str(row[0]) + " " + str(row[1]))
-<<<<<<< HEAD
-#             row = cursor.fetchone()
-=======
-#             row = cursor.fetchone()
->>>>>>> 47d65437cf7aa0964abb99a673c868675a199af1
