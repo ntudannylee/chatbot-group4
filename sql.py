@@ -54,12 +54,4 @@ class DB_function:
 # cursor.execute("SELECT * FROM user_info") 
 # row = cursor.fetchone() 
 # while row: 
-#     print(row[0], row[1], row[2])
-#     row = cursor.fetchone()
-
-# with pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password) as conn:
-#     with conn.cursor() as cursor:
-#         cursor.execute("SELECT * FROM user_info")
-#         row = cursor.fetchone()
-#         while row:
-#             print (str(row[0]) + " " + str(row[1]))
+#     print(row[0], row[1], row[2]
