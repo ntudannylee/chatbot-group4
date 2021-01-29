@@ -113,7 +113,7 @@ class MyBot(ActivityHandler):
                     rest_location = find_position_with_xy(rest_name)
                     # (x, y) = googlemaps_search_location(rest_name)
                     history_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
-                                value="https://www.google.com/maps/search/?api=1&query=" + rest_name)])))
+                                value="https://www.google.com/maps/search/?api=1&query=" + str(rest_name))])))
                 message = MessageFactory.carousel(history_list)                   
                 await turn_context.send_activity(message)
         elif turn_context.activity.text == '我的最愛':
