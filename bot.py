@@ -196,6 +196,7 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(review_list)   
                 else:
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
+                
                 rest_name = turn_context.activity.text.split("_")[0]
                 self.history.add_history(user_id, rest_name)
 
@@ -352,8 +353,6 @@ class MyBot(ActivityHandler):
             elif turn_context.activity.address!='':
                 turn_context.send_activity(turn_context.activity.address)
                 
-            elif turn_context.activity.text == 'get id':
-                await turn_context.send_activity(turn_context.activity.recipient.id)
             # non-type
             else:
                 message = '不好意思，我聽不太明白，請說的具體一點'
