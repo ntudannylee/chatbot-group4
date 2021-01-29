@@ -25,6 +25,8 @@ class my_favorite:
             output = ''
             for i in range(len(restaurant_name)):
                 output += restaurant_name[i]
+        else:
+            output = restaurant_name
         if (original_fav[0] is not None):
             fav = original_fav[0].split(' ')
             if (output not in fav):
