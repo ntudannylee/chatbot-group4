@@ -16,8 +16,8 @@ from history import history
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
+from azure.cognitiveservices.language.luis.runtime.models import LuisResult
 from igcrawler import crawl
-
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -65,7 +65,14 @@ class MyBot(ActivityHandler):
 
         ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
+    # parse intent and entity 
         intent = LuisRecognizer.top_intent(recognizer_result)
+        luis_result = recognizer_result.properties["luisResult"]
+        if luis_result.entities:
+            entities_list = ",".join(
+                [entity_obj.entity for entity_obj in luis_result.entities]
+            )
+            print(entities_list)
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
@@ -118,7 +125,7 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(review_list)   
                 else:
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
-                    
+
                 rest_name = turn_context.activity.text.split("_")[0]
                 self.history.add_history(user_id, rest_name)
 
