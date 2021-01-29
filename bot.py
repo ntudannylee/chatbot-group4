@@ -6,7 +6,7 @@ from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOp
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
-from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location, find_position_with_xy
+from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location, find_position_with_xy, googlemaps_search_nearby
 from sql import DB_function
 from favorite import my_favorite
 from history import history
@@ -18,6 +18,7 @@ import opendata_vegetable
 from azure.cognitiveservices.language.luis.runtime.models import LuisResult
 from weather import todaytop3eat
 import re
+import json
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -199,7 +200,38 @@ class MyBot(ActivityHandler):
         # 判斷intent
 
             # 書文的func
-            if entity == '':
+
+            # line address
+            elif ("{" in turn_context.activity.text and "}" in turn_context.activity.text):
+                line_address_json = json.loads(turn_context.activity.text)
+                print('line_address_json', line_address_json)
+                x = line_address_json['latitude']
+                y = line_address_json['longitude']
+                restaurants_dict = googlemaps_search_nearby(x ,y ,'steak')
+                # 沒有餐廳的狀況
+                if(len(restaurants_dict) == 0):
+                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+                else:
+                    restaurants_list=[]
+                    for i in range(len(restaurants_dict)):
+                        restaurants_list.append(
+                            CardFactory.hero_card(
+                                HeroCard(
+                                    title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating'])+ "👍", 
+                                    images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                    buttons=[CardAction(type="openUrl",title="地圖",
+                                    value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                    CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                )
+                        ))
+                        if(i==10):
+                            break
+
+                    message = MessageFactory.carousel(restaurants_list)                   
+                    await turn_context.send_activity(message)
+
+            elif entity == '':
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(
                     HeroCard( title="無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉"
@@ -211,6 +243,7 @@ class MyBot(ActivityHandler):
                 ])
                 await turn_context.send_activity(message)
                 print('entity:', entity)
+
 
             elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text and "_IG" not in turn_context.activity.text:      
 
@@ -272,7 +305,6 @@ class MyBot(ActivityHandler):
                     await turn_context.send_activity(message)
                 
 
-
             elif('_$' in turn_context.activity.text):
                 money_status = 1
                 msg = turn_context.activity.text    
@@ -290,7 +322,6 @@ class MyBot(ActivityHandler):
                     restaurants_dict = googlemaps_API("北車", money_status, msg)
                     print(restaurants_dict)
                 if(intent == '使用者地理位置'):
-                    print('123123')
                     restaurants_dict = googlemaps_API(msg, money_status, '')
                     print(restaurants_dict)
                 print('money_status:', money_status)
