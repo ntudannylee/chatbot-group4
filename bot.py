@@ -114,7 +114,17 @@ class MyBot(ActivityHandler):
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
+    # 個人化推薦
+        elif turn_context.activity.text == '個人化推薦':
+            todayrecom = todaytop3eat()
+            await turn_context.send_activity("今天最低溫為 %s, 為您推薦以下料理："%todayrecom[0])
+            todaylist = []
+            for tt in range(3):
+                todaylist.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
+            msg = MessageFactory.carousel(today_list)
+            await turn_context.send_activity(msg)
         else:
+        # 我的最愛
             if turn_context.activity.text == '我的最愛':
                 res = self.favor.get_favorite(user_id)
                 if (res is None):
@@ -131,6 +141,7 @@ class MyBot(ActivityHandler):
                 rest_name = turn_context.activity.text.split("_")[0]
                 message = self.favor.add_favorite(user_id, rest_name)
                 await turn_context.send_activity(message)
+        # 歷史紀錄
             elif turn_context.activity.text == '歷史紀錄':
                 res = self.history.get_history(user_id)
                 if (res is None):
@@ -143,6 +154,7 @@ class MyBot(ActivityHandler):
                         history_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location)))
                     message = MessageFactory.carousel(history_list)                   
                     await turn_context.send_activity(message)
+        # IG
             elif "IG" in turn_context.activity.text:
                 hashtag = turn_context.activity.text.split("_")[0].split(' ')[0].split('-')[0].split('/')[0].split("'")[0].split('&')[0]
                 url = 'https://www.instagram.com/explore/tags/'+hashtag
@@ -152,7 +164,7 @@ class MyBot(ActivityHandler):
                     CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=url)]))
                 ])                   
                 await turn_context.send_activity(message) 
-                    
+        # 找評論
             elif "評論"in turn_context.activity.text:
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
@@ -179,7 +191,8 @@ class MyBot(ActivityHandler):
 
                 message = MessageFactory.carousel(review_list)                   
                 await turn_context.send_activity(message)
-            # 書文的func
+        # 判斷intent
+
             elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text:      
 
                 message = MessageFactory.carousel([
