@@ -16,6 +16,7 @@ from history import add_history, get_history
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
+from igcrawler import crawl
 
 
 class MyBot(ActivityHandler):
