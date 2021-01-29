@@ -70,7 +70,7 @@ class MyBot(ActivityHandler):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
             if turn_context.activity.text == '我的最愛':
-                res = self.favor.get_favorite()
+                res = self.favor.get_favorite(user_id)
                 if (res is None):
                     await turn_context.send_activity("還沒有最愛的餐廳，趕快搜尋餐廳並加入最愛吧~")
                 else:
