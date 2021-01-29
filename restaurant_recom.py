@@ -1,7 +1,11 @@
 import googlemaps
-import opendata
+import opendata_earth 
+import opendata_vegetable 
 # 餐具友善餐廳列表
-good_list = opendata.get_data()
+good_list = opendata_earth.get_earth_data()
+#素食餐廳列表
+vegetable_list = opendata_vegetable.get_vege_data()
+
 # Client initialization
 API_key = 'AIzaSyAPtgFF8msgOfa_CK_FevErxHxH6HGZ8EM'
 gmaps = googlemaps.Client(key=API_key)
