@@ -67,6 +67,9 @@ class MyBot(ActivityHandler):
         recognizer_result = await self.recognizer.recognize(turn_context)
     # parse intent and entity 
         intent = LuisRecognizer.top_intent(recognizer_result)
+        entity='steak'
+        entity_address='台北車站'
+        ## get user input and make response
         luis_result = recognizer_result.properties["luisResult"]
         if luis_result.entities:
             entities_list = ",".join(
@@ -131,35 +134,56 @@ class MyBot(ActivityHandler):
 
                 message = MessageFactory.carousel(review_list)                   
                 await turn_context.send_activity(message)
-        # # add restaurant to my favorite
-        #     elif "加入我的最愛"in turn_context.activity.text:
-        #         add_name = turn_context.activity.text.split("_")[0]
-        #         insert_myfav = 'INSERT INTO user_info (ID, favorite) VALUES (\'' + user_id + '\', %s);'%(add_name)
-        #         self.db_func.DB_insert(insert_myfav)
-        
-            elif turn_context.activity.text == "get my id":
-                user_id = turn_context.activity.recipient.id
-                await turn_context.send_activity(user_id)
-            
             # 書文的func
-            elif intent == "使用者食物類別": 
+            elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text:      
 
-                msg = '請輸入您目前的地點或是附近的景點 🧐（例如：北車、公館）（小提示：點擊Line的+號可以傳地址上來呦!）'
+                message = MessageFactory.carousel([
+                        CardFactory.hero_card(
+                          HeroCard(title='您想吃的食物為：' + str(entity)
+                        , subtitle= '請選擇您的預算區間： 🤑'
+                        , buttons=[CardAction(type="imBack",title="$$$",value="我想吃" + str(entity) + "_$$$")
+                        , CardAction(type="imBack",title="$$",value="我想吃" + str(entity) + "_$$")
+                        , CardAction(type="imBack",title="$",value="我想吃" + str(entity) + "_$")]
+                        ))
+                ])
+                await turn_context.send_activity(message)
+
+                # msg = '請輸入您目前的地點或是附近的景點 🧐（例如：北車、公館）（小提示：點擊Line的+號可以傳地址上來呦!）'
        
-                await turn_context.send_activity(msg)
-            # elif(turn_context.activity.text.message.type=='location'):
-            #     print('work')
+                # await turn_context.send_activity(msg)
+
+            elif intent == "使用者地理位置" and "_$" not in turn_context.activity.text:              
+                message = MessageFactory.carousel([
+                        CardFactory.hero_card(
+                        HeroCard(title='您的所在位置為：' + str(entity_address)
+                        , subtitle= '請選擇您的預算區間： 🤑'
+                        , buttons=[CardAction(type="imBack",title="$$$",value="我在" + str(entity_address) + "_$$$")
+                        , CardAction(type="imBack",title="$$",value="我在" + str(entity_address) + "_$$")
+                        , CardAction(type="imBack",title="$",value="我在" + str(entity_address) + "_$")]
+                        ))
+                ])
+                await turn_context.send_activity(message)
+
 
             elif('_$' in turn_context.activity.text):
                 money_status = 1
+                msg = turn_context.activity.text    
                 # 判斷price_level
                 if('_$$' in turn_context.activity.text):
                     money_status = 2
+                    msg = msg.replace('_$$', '')
                 elif('_$$$' in turn_context.activity.text):
                     money_status = 3
-                    
-                restaurants_dict = googlemaps_API(turn_context.activity.text, money_status)
+                    msg = msg.replace('_$$$', '')
+                msg = msg.replace('_$', '')
+                msg = msg.replace('我想吃', '')
+                if(intent == '使用者食物類別'):
+                    restaurants_dict = googlemaps_API("北車", money_status, msg)
+                    print(restaurants_dict)
+                if(intent == '使用者地理位置'):
+                    restaurants_dict = googlemaps_API(msg, money_status, '')
                 print('money_status:', money_status)
+                print('msg:', msg)
                 # 沒有餐廳的狀況
                 if(len(restaurants_dict) == 0):
                     message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
@@ -201,20 +225,6 @@ class MyBot(ActivityHandler):
             elif turn_context.activity.address!='':
                 turn_context.send_activity(turn_context.activity.address)
                 
-
-            elif intent == "使用者地理位置" :              
-                message = MessageFactory.carousel([
-                        CardFactory.hero_card(
-                          HeroCard(title='您的所在位置為：' + str(turn_context.activity.text)
-                        , subtitle= '請選擇您的預算區間： 🤑'
-                        , buttons=[CardAction(type="imBack",title="$$$",value=str(turn_context.activity.text) + "_$$$")
-                        , CardAction(type="imBack",title="$$",value=str(turn_context.activity.text) + "_$$")
-                        , CardAction(type="imBack",title="$",value=str(turn_context.activity.text) + "_$")]
-                        ))
-                
-                ])
-                await turn_context.send_activity(message)
-
             elif turn_context.activity.text == 'get id':
                 await turn_context.send_activity(turn_context.activity.recipient.id)
             # non-type
