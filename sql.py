@@ -4,21 +4,12 @@ class DB_function:
 
     def __init__(self):
         server = 'dbrestaurantserver.database.windows.net'
-        database = 'dbrestaurant'
+        database = 'dbsertaurant'
         username = 'restadmin'
         password = 'Chatbot4'   
         # driver= '{ODBC Driver 17 for SQL Server}'
         cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
         self.cursor = cnxn.cursor()
-
-    # def connect_to_DB():
-    #     server = 'db-chatbot.database.windows.net'
-    #     database = 'restaurant_DB'
-    #     username = 'rest-admin'
-    #     password = 'Chatbot4'   
-    #     # driver= '{ODBC Driver 17 for SQL Server}'
-    #     cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-    #     cursor = cnxn.cursor()
 
     def DB_query(self, query):
         self.cursor.execute(query)
@@ -72,4 +63,3 @@ class DB_function:
 #         row = cursor.fetchone()
 #         while row:
 #             print (str(row[0]) + " " + str(row[1]))
-#             row = cursor.fetchone()
