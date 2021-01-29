@@ -3,13 +3,15 @@
 from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
+
 from botbuilder.schema import ChannelAccount
+
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
 from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location
 from sql import DB_function
-
+from favorite import my_favorite
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
@@ -39,31 +41,34 @@ class MyBot(ActivityHandler):
             include_all_intents=True, include_instance_data=True
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
-        # self.user_id = str(SourceUser.sender_id())
+
         self.db_func = DB_function()
+        self.favor = my_favorite()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
+        ## DB insert old user
         id_res = self.db_func.DB_query('SELECT ID FROM user_info')
         user_id = turn_context.activity.recipient.id
 #    if userid not in our db, add it        
         if user_id not in id_res:
-            insert_query = 'INSERT INTO user_info (ID, counter) VALUES (\'' + user_id + '\', 0);'
+            insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (\'' + user_id + '\', \'[]\', \'[]\', 0);'
             self.db_func.DB_insert(insert_query)
+            self.db_func.DB_commit()
+
+        ## QnA Maker's response
         response = await self.qna_maker.get_answers(turn_context)
+
+        ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
         intent = LuisRecognizer.top_intent(recognizer_result)
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
-        # execute sql query
-            if turn_context.activity.text == "test sql":
-                output = DB_query("Select ID from user_info")
-                for i in range(len(output)):
-                    await turn_context.send_activity(output[i])
         #crawl blogger and ifoodie 
             elif "評論"in turn_context.activity.text:
+
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
                 re = webcrawl(turn_context.activity.text)
@@ -73,7 +78,6 @@ class MyBot(ActivityHandler):
 
 
                 review_list = []
-
                 for index in range(len(blog_re)):
                     review_list.append(CardFactory.hero_card(HeroCard(title=blog_re[index][1], images=[CardImage(url=blog_re[index][3])], buttons=[CardAction(type="openUrl",title="前往網頁",value=blog_re[index][2])])))
                                 
@@ -86,16 +90,15 @@ class MyBot(ActivityHandler):
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
                 
                 await turn_context.send_activity(message)
-        # add restaurant to my favorite
-            elif "加入我的最愛"in turn_context.activity.text:
-                add_name = turn_context.activity.text.split("_")[0]
-                insert_myfav = 'INSERT INTO user_info (ID, favorite) VALUES (\'' + user_id + '\', %s);'%(add_name)
-                self.db_func.DB_insert(insert_myfav)
+        # # add restaurant to my favorite
+        #     elif "加入我的最愛"in turn_context.activity.text:
+        #         add_name = turn_context.activity.text.split("_")[0]
+        #         insert_myfav = 'INSERT INTO user_info (ID, favorite) VALUES (\'' + user_id + '\', %s);'%(add_name)
+        #         self.db_func.DB_insert(insert_myfav)
         
             elif turn_context.activity.text == "get my id":
                 user_id = turn_context.activity.recipient.id
                 await turn_context.send_activity(user_id)
-            
             
             # 書文的func
             elif intent == "使用者食物類別": 
@@ -167,6 +170,8 @@ class MyBot(ActivityHandler):
                 ])
                 await turn_context.send_activity(message)
             # non-type
+            elif turn_context.activity.text == 'get id':
+                await turn_context.send_activity(turn_context.activity.recipient.id)
             else:
                 message = '不好意思，我聽不太明白，請說的具體一點'
                 await turn_context.send_activity(message)
@@ -179,8 +184,11 @@ class MyBot(ActivityHandler):
     ):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
+                ## DB insert new user
+                id_res = self.db_func.DB_query('SELECT ID FROM user_info')
                 user_id = turn_context.activity.recipient.id
-                insert_query = 'INSERT INTO user_info (ID, counter) VALUES (\'' + user_id + '\', 0);'
-                # print(insert_query)
-                self.db_func.DB_insert(insert_query)
-                await turn_context.send_activity("美食公道伯在此🧙‍♂️，請輸入『我要大吃特吃』以繼續" + turn_context.activity.recipient.id)
+                if user_id not in id_res:
+                    insert_query = 'INSERT INTO user_info (ID, recently, favorite, counter) VALUES (\'' + user_id + '\', \'[]\', \'[]\', 0);'
+                    self.db_func.DB_insert(insert_query)
+                    self.db_func.DB_commit()
+                await turn_context.send_activity("美食公道伯在此🧙‍♂️，請輸入『我要大吃特吃』以繼續")
