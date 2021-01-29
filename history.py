@@ -23,8 +23,9 @@ class history:
         #     output = restaurant_name[0]
         if (res[0] is not None):
             history = res[0].split(' ')
-            if (restaurant_name not in history):
-                history[counter] = restaurant_name
+            if (output not in history):
+                counter = int(counter[0])
+                history[counter] = output
                 put_back = ''
                 for i in range(len(history)):
                     put_back += history[i] + ' '

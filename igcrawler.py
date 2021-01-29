@@ -110,7 +110,7 @@ def crawl(hashtag):
     #print(post_img_list)
     return(post_img_list)
     
-#post_img_list = crawl('馬辣頂級麻辣鴛鴦火鍋')
+#post_url_list = crawl('iim3chatbot', 'imchatbot!')
 
 
 

@@ -16,8 +16,10 @@ from history import history
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
+import opendata_earth 
+import opendata_vegetable 
 from azure.cognitiveservices.language.luis.runtime.models import LuisResult
-from igcrawler import crawl
+from weather import todaytop3eat
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -142,13 +144,13 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(history_list)                   
                     await turn_context.send_activity(message)
             elif "IG" in turn_context.activity.text:
+                hashtag = turn_context.activity.text.split("_")[0].split(' ')[0].split('-')[0].split('/')[0].split("'")[0].split('&')[0]
+                url = 'https://www.instagram.com/explore/tags/'+hashtag
+
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳的IG熱門貼文...")
-                
-                ig_re = crawl(turn_context.activity.text)
-                ig_post_list = []
-                for index in range(len(ig_re)):
-                    ig_post_list.append(CardFactory.hero_card(HeroCard(images=[CardImage(url=ig_re[index][1])], buttons=[CardAction(type="openUrl",title="前往IG文章",value=ig_re[index][0])])))
-                message = MessageFactory.carousel(ig_post_list)                   
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=url)]))
+                ])                   
                 await turn_context.send_activity(message) 
                     
             elif "評論"in turn_context.activity.text:
