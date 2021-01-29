@@ -90,3 +90,8 @@ def googlemaps_API(place, money_status):
 def show_photo(ref):
     url = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference='+ ref +'&key='+API_key
     return url
+
+def find_position_with_xy(place):
+    geocode_result = gmaps.geocode(place)
+    if geocode_result:
+        return geocode_result[0]['formatted_address']
