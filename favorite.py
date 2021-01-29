@@ -17,6 +17,7 @@ class my_favorite:
         # for i in range(len(current_fav)):
         #     original_fav += current_fav[i]
         original_fav = self.db_func.DB_query('SELECT favorite FROM user_info WHERE ID=\'' + user_id + '\'')
+        print(original_fav)
         query = 'UPDATE user_info SET favorite=\'' + original_fav + ' ' + restaurant_name + '\' WHERE ID=\'' + user_id + '\';'
         self.db_func.DB_insert(query)
         self.db_func.DB_commit()

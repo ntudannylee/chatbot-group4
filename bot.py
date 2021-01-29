@@ -75,8 +75,9 @@ class MyBot(ActivityHandler):
                         fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location)))
                     message = MessageFactory.carousel(fav_list)                   
                     await turn_context.send_activity(message)
-            elif turn_context.activity.text == '???': ## add favorite button
-                message = self.favor.add_favorite(user_id, restaurant, location)
+            elif "加入最愛" in turn_context.activity.text: ## add favorite button
+                rest_name = turn_context.activity.text.split("_")[0]
+                message = self.favor.add_favorite(user_id, rest_name)
                 await turn_context.send_activity(message)
             elif turn_context.activity.text == '歷史紀錄':
                 res = get_history(user_id)

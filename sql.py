@@ -4,7 +4,7 @@ class DB_function:
 
     def __init__(self):
         server = 'dbrestaurantserver.database.windows.net'
-        database = 'dbrestaurant'
+        database = 'dbsertaurant'
         username = 'restadmin'
         password = 'Chatbot4'   
         # driver= '{ODBC Driver 17 for SQL Server}'
