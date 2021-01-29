@@ -89,21 +89,21 @@ class MyBot(ActivityHandler):
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
     # 個人化推薦
-        elif turn_context.activity.text == '個人化推薦':
+        elif turn_context.activity.text == '個人化推薦🍴':
             todayrecom = todaytop3eat()
-            await turn_context.send_activity("今天最低溫為 %s, 為您推薦以下料理："%todayrecom[0])
+            await turn_context.send_activity("今天最低溫🌡為 %s, 為您推薦以下料理："%todayrecom[0])
             todaylist = []
             for tt in range(3):
                 restaurants_dict = googlemaps_API("北車", 3, todayrecom[1][tt])
                 todaylist.append(restaurants_list.append(
                             CardFactory.hero_card(
                                 HeroCard(
-                                    title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), 
+                                    title=restaurants_dict[0]['name'], text='👍🏼推薦指數 : ' + str(restaurants_dict[0]['rating']), 
                                     images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], 
-                                    buttons=[CardAction(type="openUrl",title="地圖",
+                                    buttons=[CardAction(type="openUrl",title="🗺地圖",
                                     value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), 
                                     CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), 
-                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")]
+                                    CardAction(type="imBack",title="加入我的最愛❤",value=restaurants_dict[0]['name']+"_加入最愛")]
                                 )
                             )
                         ))
@@ -117,7 +117,7 @@ class MyBot(ActivityHandler):
         elif turn_context.activity.text == '瀏覽紀錄':
             res = self.history.get_history(user_id)
             if (res == []):
-                await turn_context.send_activity("還沒有瀏覽紀錄，趕快搜尋餐廳吧~")
+                await turn_context.send_activity("還沒有瀏覽紀錄，趕快搜尋餐廳吧~GOGO")
             else:
                 history_list = []
                 for length in range(len(res)):
@@ -131,7 +131,7 @@ class MyBot(ActivityHandler):
         elif turn_context.activity.text == '我的最愛':
             res = self.favor.get_favorite(user_id)
             if (res == []):
-                await turn_context.send_activity("還沒有最愛的餐廳，趕快搜尋餐廳並加入最愛吧~")
+                await turn_context.send_activity("還沒有最愛的餐廳，趕快搜尋餐廳並加入最愛吧~GOGO")
             else:
                 fav_list = []
                 for length in range(len(res)):
@@ -153,7 +153,7 @@ class MyBot(ActivityHandler):
             await turn_context.send_activity(message) 
         # 找評論
 
-        elif "評論"in turn_context.activity.text:
+        elif "評論" in turn_context.activity.text:
             await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
             # 展宏的func
             re = webcrawl(turn_context.activity.text)
