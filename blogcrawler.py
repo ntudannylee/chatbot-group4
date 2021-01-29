@@ -20,8 +20,7 @@ start = time.time()
 
 def blogcrawler(search_name):
     
-    search_name = search_name.split("_")[0]
-
+    search_name = search_name.split("_")[0].split(' ')[0].split('-')[0].split('/')[0]
 
     blog_from=[]
     name_list=[]
