@@ -72,17 +72,18 @@ class MyBot(ActivityHandler):
         ## get user input and make response
         luis_result = recognizer_result.properties["luisResult"]
         entity=''
-        if('我想吃咖啡廳' == turn_context.activity.text):
-            entity='咖啡廳'
-        if('我想吃牛排' == turn_context.activity.text):
-            entity='牛排'
-        if('我想吃素食' == turn_context.activity.text):
-            entity='素食'
+        # if('我想吃咖啡廳' == turn_context.activity.text):
+        #     entity='咖啡廳'
+        # if('我想吃牛排' == turn_context.activity.text):
+        #     entity='牛排'
+        # if('我想吃素食' == turn_context.activity.text):
+        #     entity='素食'
 
         if luis_result.entities:
             entities_list =[]
             for ll in luis_result.entities:
-                # print(ll.entity)
+                print(turn_context.activity.text)
+                print(ll)
                 entities_list.append(ll.entity)
             print(entities_list)
             print(len(entities_list))
@@ -91,15 +92,15 @@ class MyBot(ActivityHandler):
             else:
                 entity = str(entities_list[0]+'^'+entities_list[1])
         else:
-            if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
+            # if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
                 await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(
                     HeroCard(
                     subtitle= '請選擇您想吃的類型： 😗'
-                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
-                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
+                    , buttons=[CardAction(type="imBack", title='咖啡廳', value="我想吃咖啡廳")
+                    , CardAction(type="imBack", title="牛排", value="我想吃牛排")
+                    , CardAction(type="imBack", title="素食", value="我想吃素食")]
                     ))
                 ])
                 await turn_context.send_activity(message)
@@ -107,7 +108,29 @@ class MyBot(ActivityHandler):
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
+    # 個人化推薦
+        elif turn_context.activity.text == '個人化推薦':
+            todayrecom = todaytop3eat()
+            await turn_context.send_activity("今天最低溫為 %s, 為您推薦以下料理："%todayrecom[0])
+            todaylist = []
+            for tt in range(3):
+                restaurants_dict = googlemaps_API("北車", 3, todayrecom[1][tt])
+                todaylist.append(restaurants_list.append(
+                            CardFactory.hero_card(
+                                HeroCard(
+                                    title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), 
+                                    images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], 
+                                    buttons=[CardAction(type="openUrl",title="地圖",
+                                    value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), 
+                                    CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), 
+                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")]
+                                )
+                            )
+                        ))
+            msg = MessageFactory.carousel(today_list)
+            await turn_context.send_activity(msg)
         else:
+        # 我的最愛
             if turn_context.activity.text == '我的最愛':
                 res = self.favor.get_favorite(user_id)
                 if (res is None):
@@ -124,6 +147,7 @@ class MyBot(ActivityHandler):
                 rest_name = turn_context.activity.text.split("_")[0]
                 message = self.favor.add_favorite(user_id, rest_name)
                 await turn_context.send_activity(message)
+        # 歷史紀錄
             elif turn_context.activity.text == '歷史紀錄':
                 res = self.history.get_history(user_id)
                 print(user_id)
@@ -137,6 +161,7 @@ class MyBot(ActivityHandler):
                         history_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location)))
                     message = MessageFactory.carousel(history_list)                   
                     await turn_context.send_activity(message)
+        # IG
             elif "IG" in turn_context.activity.text:
                 hashtag = turn_context.activity.text.split("_")[0].split(' ')[0].split('-')[0].split('/')[0].split("'")[0].split('&')[0]
                 url = 'https://www.instagram.com/explore/tags/'+hashtag
@@ -145,7 +170,10 @@ class MyBot(ActivityHandler):
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(HeroCard(title=hashtag+'的IG熱門文章',images=[CardImage(url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB1DfQKJ-vfC16ybbNPP0N7FVVV6bNEC3W9Q&usqp=CAU')], buttons=[CardAction(type="openUrl",title="前往IG熱門文章",value=url)]))
                 ])                   
-                await turn_context.send_activity(message)
+
+                await turn_context.send_activity(message) 
+        # 找評論
+
             elif "評論"in turn_context.activity.text:
                 await turn_context.send_activity("稍等一下唷! 美食公道伯正在幫你尋找餐廳評論...")
                 # 展宏的func
@@ -171,7 +199,8 @@ class MyBot(ActivityHandler):
 
                 message = MessageFactory.carousel(review_list)                   
                 await turn_context.send_activity(message)
-            # 書文的func
+        # 判斷intent
+
             elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text:      
 
                 message = MessageFactory.carousel([
