@@ -4,7 +4,7 @@ from flask import Config
 from botbuilder.ai.qna import QnAMaker, QnAMakerEndpoint, QnAMakerOptions
 from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext, CardFactory, RecognizerResult
-from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes
+from botbuilder.schema import ChannelAccount, HeroCard, CardImage, CardAction, Activity, ActivityTypes, ThumbnailCard
 from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location, find_position_with_xy, googlemaps_search_nearby
 from sql import DB_function
@@ -83,7 +83,7 @@ class MyBot(ActivityHandler):
             todaylist = []
             for tt in range(3):
                 restaurants_dict = googlemaps_API("北車", 3, todayrecom[1][tt])
-                todaylist.append(restaurants_list.append(
+                todaylist.append(
                             CardFactory.hero_card(
                                 HeroCard(
                                     title=restaurants_dict[0]['name'], text='👍🏼推薦指數 : ' + str(restaurants_dict[0]['rating']), 
@@ -94,8 +94,8 @@ class MyBot(ActivityHandler):
                                     CardAction(type="imBack",title="加入我的最愛❤",value=restaurants_dict[0]['name']+"_加入最愛")]
                                 )
                             )
-                        ))
-            msg = MessageFactory.carousel(today_list)
+                        )
+            msg = MessageFactory.carousel(todaylist)
             await turn_context.send_activity(msg)
 
         elif "加入最愛" in turn_context.activity.text: ## add favorite button
@@ -125,8 +125,9 @@ class MyBot(ActivityHandler):
                 for length in range(len(res)):
                     rest_name = res[length]
                     rest_location = find_position_with_xy(rest_name)
-                    fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
-                                value="https://www.google.com/maps/search/?api=1&query=" + rest_name)])))
+                    fav_list.append(CardFactory.thumbnail_card(ThumbnailCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type='openUrl', title='導航', value="https://www.google.com/maps/search/?api=1&query=" + str(rest_name))])))
+                    # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
+                    #             value="https://www.google.com/maps/search/?api=1&query=" + rest_name)])))
                 message = MessageFactory.carousel(fav_list)                   
                 await turn_context.send_activity(message)
         elif "IG" in turn_context.activity.text:
