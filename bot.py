@@ -88,7 +88,9 @@ class MyBot(ActivityHandler):
                 await turn_context.send_activity(message)
         # add restaurant to my favorite
             elif "加入我的最愛"in turn_context.activity.text:
-
+                add_name = turn_context.activity.text.split("_")[0]
+                insert_myfav = 'INSERT INTO user_info (ID, favorite) VALUES (\'' + user_id + '\', %s);'%(add_name)
+                self.db_func.DB_insert(insert_myfav)
         
             elif turn_context.activity.text == "get my id":
                 user_id = turn_context.activity.recipient.id
