@@ -16,10 +16,11 @@ from history import add_history, get_history
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
-
+from azure.cognitiveservices.language.luis.runtime.models import LuisResult
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
+
     def __init__(
         self, config: Config
         ):
@@ -48,6 +49,7 @@ class MyBot(ActivityHandler):
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
+        turn_context.activity.address=''
         ## DB insert old user
         id_res = self.db_func.DB_query('SELECT ID FROM user_info')
         user_id = turn_context.activity.recipient.id
@@ -62,13 +64,20 @@ class MyBot(ActivityHandler):
 
         ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
+    # parse intent and entity 
         intent = LuisRecognizer.top_intent(recognizer_result)
+        luis_result = recognizer_result.properties["luisResult"]
+        if luis_result.entities:
+            entities_list = ",".join(
+                [entity_obj.entity for entity_obj in luis_result.entities]
+            )
+            print(entities_list)
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
             if turn_context.activity.text == '我的最愛':
-                res = self.favor.get_favorite()
+                res = self.favor.get_favorite(user_id)
                 if (res is None):
                     await turn_context.send_activity("還沒有最愛的餐廳，趕快搜尋餐廳並加入最愛吧~")
                 else:
@@ -79,8 +88,9 @@ class MyBot(ActivityHandler):
                         fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location)))
                     message = MessageFactory.carousel(fav_list)                   
                     await turn_context.send_activity(message)
-            elif turn_context.activity.text == '???': ## add favorite button
-                message = self.favor.add_favorite(user_id, restaurant, location)
+            elif "加入最愛" in turn_context.activity.text: ## add favorite button
+                rest_name = turn_context.activity.text.split("_")[0]
+                message = self.favor.add_favorite(user_id, rest_name)
                 await turn_context.send_activity(message)
             elif turn_context.activity.text == '歷史紀錄':
                 res = get_history(user_id)
@@ -136,6 +146,8 @@ class MyBot(ActivityHandler):
                 msg = '請輸入您目前的地點或是附近的景點 🧐（例如：北車、公館）（小提示：點擊Line的+號可以傳地址上來呦!）'
        
                 await turn_context.send_activity(msg)
+            # elif(turn_context.activity.text.message.type=='location'):
+            #     print('work')
 
             elif('_$' in turn_context.activity.text):
                 money_status = 1
@@ -185,7 +197,11 @@ class MyBot(ActivityHandler):
 
                 await turn_context.send_activity(message)
 
-            elif intent == "使用者地理位置":              
+            elif turn_context.activity.address!='':
+                turn_context.send_activity(turn_context.activity.address)
+                
+
+            elif intent == "使用者地理位置" :              
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
                           HeroCard(title='您的所在位置為：' + str(turn_context.activity.text)
@@ -197,9 +213,10 @@ class MyBot(ActivityHandler):
                 
                 ])
                 await turn_context.send_activity(message)
-            # non-type
+
             elif turn_context.activity.text == 'get id':
                 await turn_context.send_activity(turn_context.activity.recipient.id)
+            # non-type
             else:
                 message = '不好意思，我聽不太明白，請說的具體一點'
                 await turn_context.send_activity(message)
