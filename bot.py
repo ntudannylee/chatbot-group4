@@ -12,7 +12,7 @@ from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location, find_position_with_xy
 from sql import DB_function
 from favorite import my_favorite
-from history import add_history, get_history
+from history import history
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
@@ -43,9 +43,9 @@ class MyBot(ActivityHandler):
             include_all_intents=True, include_instance_data=True
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
-
         self.db_func = DB_function()
         self.favor = my_favorite()
+        self.history = history()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
@@ -86,7 +86,7 @@ class MyBot(ActivityHandler):
                 message = self.favor.add_favorite(user_id, rest_name)
                 await turn_context.send_activity(message)
             elif turn_context.activity.text == '歷史紀錄':
-                res = get_history(user_id)
+                res = self.history.get_history(user_id)
                 if (res is None):
                     await turn_context.send_activity("還沒有瀏覽紀錄，趕快搜尋餐廳吧~")
                 else:
@@ -117,8 +117,9 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(review_list)   
                 else:
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
+                    
                 rest_name = turn_context.activity.text.split("_")[0]
-                add_history(user_id, rest_name)
+                self.history.add_history(user_id, rest_name)
 
                 message = MessageFactory.carousel(review_list)                   
                 await turn_context.send_activity(message)
