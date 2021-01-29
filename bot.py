@@ -19,7 +19,7 @@ from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
 import opendata_earth 
 import opendata_vegetable 
 from azure.cognitiveservices.language.luis.runtime.models import LuisResult
-
+from weather import todaytop3eat
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -279,6 +279,20 @@ class MyBot(ActivityHandler):
                                             )
                                         )
                                     )
+                                else:
+                                    restaurants_list.append(
+                                        CardFactory.hero_card(
+                                            HeroCard(
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
+                                                images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                                buttons=[CardAction(type="openUrl",title="地圖",
+                                                value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                                CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                            )
+                                        )
+                                    )
+
                         if(i>10):
                             break
                     
