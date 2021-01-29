@@ -15,7 +15,7 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-def crawl(account,password,hashtag):
+def crawl(hashtag):
     
     browser = webdriver.Chrome('./chromedriver')
     url = 'https://www.instagram.com/'  
@@ -32,8 +32,8 @@ def crawl(account,password,hashtag):
     print("inputing username and password...")
     
     # ------ 輸入帳號密碼 ------
-    username_input.send_keys(account)
-    password_input.send_keys(password)
+    username_input.send_keys("iim3chatbot")
+    password_input.send_keys("imchatbot!")
     
     # ------ 登入 ------
     WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.XPATH,
@@ -68,7 +68,8 @@ def crawl(account,password,hashtag):
     # 往下滑並取得新的貼文連結
  
     #將地點去除一些很奇怪的符號 因為ig tag搜尋不能有這些符號
-    hashtag = hashtag.split(' ')[0].split('-')[0].split('_')[0].split('/')[0]
+    hashtag = hashtag.split("_")[0].split(' ')[0].split('-')[0].split('/')[0]
+
     url = 'https://www.instagram.com/explore/tags/'+hashtag
     browser.get(url) # 前往該網址
     #print("等待")
@@ -84,7 +85,7 @@ def crawl(account,password,hashtag):
     #print("等待")
     time.sleep(2)
     #print("好了")
-    soup = BeautifulSoup(html, 'lxml')
+    soup = BeautifulSoup(html, 'html.parser')
 
     # 尋找所有的貼文連結
     
@@ -109,7 +110,7 @@ def crawl(account,password,hashtag):
     #print(post_img_list)
     return(post_img_list)
     
-#post_url_list = crawl('iim3chatbot', 'imchatbot!')
+#post_img_list = crawl('馬辣頂級麻辣鴛鴦火鍋')
 
 
 
