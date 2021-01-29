@@ -20,6 +20,7 @@ import opendata_earth
 import opendata_vegetable 
 from azure.cognitiveservices.language.luis.runtime.models import LuisResult
 from weather import todaytop3eat
+import re
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -240,11 +241,13 @@ class MyBot(ActivityHandler):
                     for i in range(len(restaurants_dict)):
                         for a in good_list:
                             for b in vegetable_list:
-                                if a in restaurants_dict[i]['name'] and b in restaurants_dict[i]['name']:#餐廳是符合友善環境而且素食
+                                name = re.sub(r'[\':\s ,]*｜', '', restaurants_dict[i]['name'])
+
+                                if name in a and name in b :#餐廳是符合友善環境而且素食
                                     restaurants_list.append(
                                         CardFactory.hero_card(
                                             HeroCard(
-                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']) +'#自備餐具優惠 #素食',  
                                                 images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
                                                 buttons=[CardAction(type="openUrl",title="地圖",
                                                 value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
@@ -253,11 +256,11 @@ class MyBot(ActivityHandler):
                                             )
                                         )
                                     )
-                                elif a in restaurants_dict[i]['name']: #餐廳是符合友善環境
+                                elif  name in a : #餐廳是符合友善環境
                                     restaurants_list.append(
                                         CardFactory.hero_card(
                                             HeroCard(
-                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']) +'#自備餐具優惠', 
                                                 images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
                                                 buttons=[CardAction(type="openUrl",title="地圖",
                                                 value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
@@ -266,11 +269,11 @@ class MyBot(ActivityHandler):
                                             )
                                         )
                                     )
-                                elif b in restaurants_dict[i]['name']:  #餐廳是符合素食
+                                elif  name in b:  #餐廳是符合素食
                                     restaurants_list.append(
                                         CardFactory.hero_card(
                                             HeroCard(
-                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']) + '#素食', 
                                                 images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
                                                 buttons=[CardAction(type="openUrl",title="地圖",
                                                 value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
