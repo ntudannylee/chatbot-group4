@@ -12,11 +12,12 @@ from websrestaurantrecom import webcrawl
 from restaurant_recom import googlemaps_API, show_photo, googlemaps_search_location, find_position_with_xy
 from sql import DB_function
 from favorite import my_favorite
-from history import add_history, get_history
+from history import history
 from blogcrawler import blogcrawler
 from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
-
+from azure.cognitiveservices.language.luis.runtime.models import LuisResult
+from igcrawler import crawl
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -43,9 +44,9 @@ class MyBot(ActivityHandler):
             include_all_intents=True, include_instance_data=True
         )
         self.recognizer = LuisRecognizer(luis_application, luis_options, True)
-
         self.db_func = DB_function()
         self.favor = my_favorite()
+        self.history = history()
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
@@ -64,10 +65,18 @@ class MyBot(ActivityHandler):
 
         ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
+    # parse intent and entity 
         intent = LuisRecognizer.top_intent(recognizer_result)
         entity='steak'
         entity_address='台北車站'
         ## get user input and make response
+        luis_result = recognizer_result.properties["luisResult"]
+        if luis_result.entities:
+            entities_list = ",".join(
+                [entity_obj.entity for entity_obj in luis_result.entities]
+            )
+            print(entities_list)
+    # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
         else:
@@ -88,7 +97,7 @@ class MyBot(ActivityHandler):
                 message = self.favor.add_favorite(user_id, rest_name)
                 await turn_context.send_activity(message)
             elif turn_context.activity.text == '歷史紀錄':
-                res = get_history(user_id)
+                res = self.history.get_history(user_id)
                 if (res is None):
                     await turn_context.send_activity("還沒有瀏覽紀錄，趕快搜尋餐廳吧~")
                 else:
@@ -119,8 +128,9 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(review_list)   
                 else:
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
+
                 rest_name = turn_context.activity.text.split("_")[0]
-                add_history(user_id, rest_name)
+                self.history.add_history(user_id, rest_name)
 
                 message = MessageFactory.carousel(review_list)                   
                 await turn_context.send_activity(message)
