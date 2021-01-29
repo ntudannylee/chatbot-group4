@@ -8,7 +8,6 @@ class my_favorite:
     def get_favorite(self, user_id):
         query = 'SELECT favorite FROM user_info WHERE ID=\'' + user_id + '\''
         result = self.db_func.DB_query(query)
-        print(type(result))
         if (result[0] is not None):
             fav = result[0].split(' ')
             return fav
@@ -26,8 +25,8 @@ class my_favorite:
             if (restaurant_name not in fav):
                 put_back = ''
                 for i in range(len(fav)):
-                    put_back += fav[i]
-                query = 'UPDATE user_info SET favorite=\'' + put_back + ' ' + restaurant_name + '\' WHERE ID=\'' + user_id + '\';'
+                    put_back += fav[i] + ' '
+                query = 'UPDATE user_info SET favorite=\'' + put_back + restaurant_name + '\' WHERE ID=\'' + user_id + '\';'
                 self.db_func.DB_insert(query)
                 self.db_func.DB_commit()
                 return ('已把' + restaurant_name + '加入我的最愛中!!')
