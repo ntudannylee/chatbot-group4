@@ -301,7 +301,11 @@ class MyBot(ActivityHandler):
                     money_status = 3
                     msg = msg.replace('_$$$', '')
                 msg = msg.replace('_$', '')
+                msg = msg.replace('_', '')
                 msg = msg.replace('我想吃', '')
+                msg = msg.replace('我想喝', '')
+                msg = msg.replace('我要吃', '')
+                msg = msg.replace('我要喝', '')
                 msg = msg.replace('我在', '')
                 if(intent == '使用者食物類別'):
                     restaurants_dict = googlemaps_API("北車", money_status, msg)
@@ -312,8 +316,9 @@ class MyBot(ActivityHandler):
                 print('money_status:', money_status)
                 print('msg:', msg)
                 # 沒有餐廳的狀況
-                if(len(restaurants_dict) == 0):
-                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+                if not restaurants_dict:
+                    message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀" 
+                    await turn_context.send_activity(message)  
                 else:
                     # good_list = opendata_earth.get_earth_data()
                     # vegetable_list = opendata_vegetable.get_vege_data()
