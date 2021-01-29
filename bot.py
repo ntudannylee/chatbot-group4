@@ -18,6 +18,8 @@ from linebot.models.sources import SourceUser
 from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
 import opendata_earth 
 import opendata_vegetable 
+from azure.cognitiveservices.language.luis.runtime.models import LuisResult
+
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -65,7 +67,50 @@ class MyBot(ActivityHandler):
 
         ## LUIS's result & intent
         recognizer_result = await self.recognizer.recognize(turn_context)
+        # parse intent and entity 
         intent = LuisRecognizer.top_intent(recognizer_result)
+        print(intent)
+        ## get user input and make response
+        luis_result = recognizer_result.properties["luisResult"]
+        entity=''
+        if('我想吃咖啡廳' == turn_context.activity.text):
+            entity='咖啡廳'
+        if('我想吃牛排' == turn_context.activity.text):
+            entity='牛排'
+        if('我想吃素食' == turn_context.activity.text):
+            entity='素食'
+
+        if luis_result.entities:
+            entities_list =[]
+            for ll in luis_result.entities:
+                # print(ll.entity)
+                entities_list.append(ll.entity)
+            # entities_list = "".join(
+            #     [entity_obj.entity for entity_obj in luis_result.entities]
+            # )
+            print(entities_list)
+            print(len(entities_list))
+            if len(entities_list) == 1:
+                entity = entities_list[0]
+        else:
+            if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
+                await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
+                message = MessageFactory.carousel([
+                    CardFactory.hero_card(
+                    HeroCard(
+                    subtitle= '請選擇您想吃的類型： 😗'
+                    , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
+                    , CardAction(type="imBack",title="牛排",value="我想吃牛排")
+                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
+                    ))
+                ])
+                await turn_context.send_activity(message)
+                print('entity:', entity)
+        if luis_result.entities:
+            entities_list = ",".join(
+                [entity_obj.entity for entity_obj in luis_result.entities]
+            )
+            print(entities_list)
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
             await turn_context.send_activity(MessageFactory.text(response[0].answer))
@@ -128,44 +173,66 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel(review_list)   
                 else:
                     message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
-                    
+
                 rest_name = turn_context.activity.text.split("_")[0]
                 self.history.add_history(user_id, rest_name)
 
                 message = MessageFactory.carousel(review_list)                   
                 await turn_context.send_activity(message)
-        # # add restaurant to my favorite
-        #     elif "加入我的最愛"in turn_context.activity.text:
-        #         add_name = turn_context.activity.text.split("_")[0]
-        #         insert_myfav = 'INSERT INTO user_info (ID, favorite) VALUES (\'' + user_id + '\', %s);'%(add_name)
-        #         self.db_func.DB_insert(insert_myfav)
-        
-            elif turn_context.activity.text == "get my id":
-                user_id = turn_context.activity.recipient.id
-                await turn_context.send_activity(user_id)
-            
             # 書文的func
-            elif intent == "使用者食物類別": 
+            elif intent == "使用者食物類別" and "_$" not in turn_context.activity.text:      
 
-                msg = '請輸入您目前的地點或是附近的景點 🧐（例如：北車、公館）（小提示：點擊Line的+號可以傳地址上來呦!）'
+                message = MessageFactory.carousel([
+                        CardFactory.hero_card(
+                          HeroCard(title='您想吃的食物為：' + str(entity)
+                        , subtitle= '請選擇您的預算區間： 🤑'
+                        , buttons=[CardAction(type="imBack",title="$$$",value="我想吃" + str(entity) + "_$$$")
+                        , CardAction(type="imBack",title="$$",value="我想吃" + str(entity) + "_$$")
+                        , CardAction(type="imBack",title="$",value="我想吃" + str(entity) + "_$")]
+                        ))
+                ])
+                await turn_context.send_activity(message)
+
+                # msg = '請輸入您目前的地點或是附近的景點 🧐（例如：北車、公館）（小提示：點擊Line的+號可以傳地址上來呦!）'
        
-                await turn_context.send_activity(msg)
-            # elif(turn_context.activity.text.message.type=='location'):
-            #     print('work')
+                # await turn_context.send_activity(msg)
+
+            elif intent == "使用者地理位置" and "_$" not in turn_context.activity.text:              
+                message = MessageFactory.carousel([
+                        CardFactory.hero_card(
+                        HeroCard(title='您的所在位置為：' + str(entity)
+                        , subtitle= '請選擇您的預算區間： 🤑'
+                        , buttons=[CardAction(type="imBack",title="$$$",value="我在" + str(entity) + "_$$$")
+                        , CardAction(type="imBack",title="$$",value="我在" + str(entity) + "_$$")
+                        , CardAction(type="imBack",title="$",value="我在" + str(entity) + "_$")]
+                        ))
+                ])
+                await turn_context.send_activity(message)
+
 
             elif('_$' in turn_context.activity.text):
                 money_status = 1
+                msg = turn_context.activity.text    
                 # 判斷price_level
                 if('_$$' in turn_context.activity.text):
                     money_status = 2
+                    msg = msg.replace('_$$', '')
                 elif('_$$$' in turn_context.activity.text):
                     money_status = 3
-                    
-                restaurants_dict = googlemaps_API(turn_context.activity.text, money_status)
+                    msg = msg.replace('_$$$', '')
+                msg = msg.replace('_$', '')
+                msg = msg.replace('我想吃', '')
+                if(intent == '使用者食物類別'):
+                    restaurants_dict = googlemaps_API("北車", money_status, msg)
+                    print(restaurants_dict)
+                if(intent == '使用者地理位置'):
+                    restaurants_dict = googlemaps_API(msg, money_status, '')
                 print('money_status:', money_status)
+                print('msg:', msg)
                 # 沒有餐廳的狀況
                 if(len(restaurants_dict) == 0):
                     message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
+<<<<<<< HEAD
 
                 elif(len(restaurants_dict) >= 5):
                                         
@@ -203,27 +270,32 @@ class MyBot(ActivityHandler):
                     message = MessageFactory.carousel([
                             CardFactory.hero_card(HeroCard(title=restaurants_dict[0]['name'], text='推薦指數 : ' + str(restaurants_dict[0]['rating']), images=[CardImage(url=show_photo(restaurants_dict[0]['photo_reference']))], buttons=[CardAction(type="openUrl",title="地圖",value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[0]['location_x']) + "," + str(restaurants_dict[0]['location_y']) +"&query_place_id="+str(restaurants_dict[0]['place_id'])), CardAction(type="imBack",title="點此看IG熱門文章",value=restaurants_dict[0]['name']+"_IG"), CardAction(type="imBack",title="點此看評論",value=restaurants_dict[0]['name']+"_評論"), CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[0]['name']+"_加入最愛")])),
                     ])
+=======
+                else:
+                    restaurants_list=[]
+                    for i in range(len(restaurants_dict)):
+                        restaurants_list.append(
+                            CardFactory.hero_card(
+                                HeroCard(
+                                    title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
+                                    images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                    buttons=[CardAction(type="openUrl",title="地圖",
+                                    value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                    CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                )
+                            )
+                        )
+                        if(i>10):
+                            break
+>>>>>>> 2862203f38fbe6c4b81fb757753f14f9031208ae
                     
 
-                await turn_context.send_activity(message)
+                # await turn_context.send_activity(message)
 
             elif turn_context.activity.address!='':
                 turn_context.send_activity(turn_context.activity.address)
                 
-
-            elif intent == "使用者地理位置" :              
-                message = MessageFactory.carousel([
-                        CardFactory.hero_card(
-                          HeroCard(title='您的所在位置為：' + str(turn_context.activity.text)
-                        , subtitle= '請選擇您的預算區間： 🤑'
-                        , buttons=[CardAction(type="imBack",title="$$$",value=str(turn_context.activity.text) + "_$$$")
-                        , CardAction(type="imBack",title="$$",value=str(turn_context.activity.text) + "_$$")
-                        , CardAction(type="imBack",title="$",value=str(turn_context.activity.text) + "_$")]
-                        ))
-                
-                ])
-                await turn_context.send_activity(message)
-
             elif turn_context.activity.text == 'get id':
                 await turn_context.send_activity(turn_context.activity.recipient.id)
             # non-type

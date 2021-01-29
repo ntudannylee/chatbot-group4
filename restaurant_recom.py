@@ -19,11 +19,12 @@ def googlemaps_search_location(place):
     # print('經緯度', x, y)
     return (x, y)
 
-def googlemaps_search_nearby(x,y):
+def googlemaps_search_nearby(x,y,food_type):
     location = (x, y)
     radius = 1000    #1km
     place_type = 'restaurant'
-    result = gmaps.places_nearby(location, radius, type=place_type, language='zh-TW')
+    keyword = food_type #想吃的食物關鍵字 e.g.牛排, 漢堡
+    result = gmaps.places_nearby(location, radius, keyword, type=place_type, language='zh-TW')
 
     restaurants = result['results']
     restaurants_list=[]
@@ -78,9 +79,9 @@ def googlemaps_search_nearby(x,y):
     return restaurants_list
   
 # 供外界call的function，回傳格式：[{},{},...,{}]
-def googlemaps_API(place, money_status):
+def googlemaps_API(place, money_status, food_type):
     x, y = googlemaps_search_location(place)
-    restaurants = googlemaps_search_nearby(x,y)
+    restaurants = googlemaps_search_nearby(x,y,food_type)
     if(money_status == 1):
         restaurants = list(filter(lambda x: x['price_level']==1, restaurants))
     elif(money_status == 2):
