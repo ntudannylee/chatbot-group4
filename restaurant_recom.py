@@ -1,7 +1,5 @@
 import googlemaps
-import opendata
-# 餐具友善餐廳列表
-good_list = opendata.get_data()
+
 # Client initialization
 API_key = 'AIzaSyAPtgFF8msgOfa_CK_FevErxHxH6HGZ8EM'
 gmaps = googlemaps.Client(key=API_key)
