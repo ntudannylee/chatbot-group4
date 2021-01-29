@@ -16,6 +16,7 @@ from azure.cognitiveservices.language.luis.authoring import LUISAuthoringClient
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
+
     def __init__(
         self, config: Config
         ):
@@ -43,6 +44,7 @@ class MyBot(ActivityHandler):
 
 # define what we response
     async def on_message_activity(self, turn_context: TurnContext):
+        turn_context.activity.address=''
         ## DB insert old user
         id_res = self.db_func.DB_query('SELECT ID FROM user_info')
         user_id = turn_context.activity.recipient.id
@@ -88,6 +90,8 @@ class MyBot(ActivityHandler):
                 msg = '請輸入您目前的地點或是附近的景點 🧐（例如：北車、公館）（小提示：點擊Line的+號可以傳地址上來呦!）'
        
                 await turn_context.send_activity(msg)
+            # elif(turn_context.activity.text.message.type=='location'):
+            #     print('work')
 
             elif('_$' in turn_context.activity.text):
                 money_status = 1
@@ -139,7 +143,11 @@ class MyBot(ActivityHandler):
 
                 await turn_context.send_activity(message)
 
-            elif intent == "使用者地理位置":              
+            elif turn_context.activity.address!='':
+                turn_context.send_activity(turn_context.activity.address)
+                
+
+            elif intent == "使用者地理位置" :              
                 message = MessageFactory.carousel([
                         CardFactory.hero_card(
                           HeroCard(title='您的所在位置為：' + str(turn_context.activity.text)
@@ -151,9 +159,10 @@ class MyBot(ActivityHandler):
                 
                 ])
                 await turn_context.send_activity(message)
-            # non-type
+
             elif turn_context.activity.text == 'get id':
                 await turn_context.send_activity(turn_context.activity.recipient.id)
+            # non-type
             else:
                 message = '不好意思，我聽不太明白，請說的具體一點'
                 await turn_context.send_activity(message)
