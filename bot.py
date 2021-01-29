@@ -203,7 +203,7 @@ class MyBot(ActivityHandler):
                 await turn_context.send_activity(message)
 
 
-            elif "^" in entity:
+            # elif "^" in entity:
                 
 
             elif('_$' in turn_context.activity.text):
