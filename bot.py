@@ -17,6 +17,7 @@ import opendata_earth
 import opendata_vegetable 
 from azure.cognitiveservices.language.luis.runtime.models import LuisResult
 from weather import todaytop3eat
+import re
 
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
@@ -149,6 +150,7 @@ class MyBot(ActivityHandler):
         # 歷史紀錄
             elif turn_context.activity.text == '歷史紀錄':
                 res = self.history.get_history(user_id)
+                print(user_id)
                 if (res is None):
                     await turn_context.send_activity("還沒有瀏覽紀錄，趕快搜尋餐廳吧~")
                 else:
@@ -251,26 +253,79 @@ class MyBot(ActivityHandler):
                 if(intent == '使用者地理位置'):
                     print('123123')
                     restaurants_dict = googlemaps_API(msg, money_status, '')
+                    print(restaurants_dict)
                 print('money_status:', money_status)
                 print('msg:', msg)
                 # 沒有餐廳的狀況
                 if(len(restaurants_dict) == 0):
                     message = "您附近沒有相對應的餐廳可以推薦呦，輸入『吃』來繼續👀"   
                 else:
+                    good_list = opendata_earth.get_earth_data()
+                    vegetable_list = opendata_vegetable.get_vege_data()
+
                     restaurants_list=[]
                     for i in range(len(restaurants_dict)):
-                        restaurants_list.append(
-                            CardFactory.hero_card(
-                                HeroCard(
-                                    title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
-                                    images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
-                                    buttons=[CardAction(type="openUrl",title="地圖",
-                                    value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
-                                    CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
-                                    CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
-                                )
-                            )
-                        )
+                        for a in good_list:
+                            for b in vegetable_list:
+                                #name = re.sub(r'[\':\s ,]*｜', '', restaurants_dict[i]['name'])
+
+                                if restaurants_dict[i]['name'] in a and restaurants_dict[i]['name'] in b :#餐廳是符合友善環境而且素食
+                                    restaurants_list.append(
+                                        CardFactory.hero_card(
+                                            HeroCard(
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']) +'#自備餐具優惠 #素食',  
+                                                images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                                buttons=[CardAction(type="openUrl",title="地圖",
+                                                value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"), 
+                                                CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                                CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                            )
+                                        )
+                                    )
+                                elif  restaurants_dict[i]['name'] in a : #餐廳是符合友善環境
+                                    restaurants_list.append(
+                                        CardFactory.hero_card(
+                                            HeroCard(
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']) +'#自備餐具優惠', 
+                                                images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                                buttons=[CardAction(type="openUrl",title="地圖",
+                                                value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"),
+                                                CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                                CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                            )
+                                        )
+                                    )
+                                elif  restaurants_dict[i]['name'] in b:  #餐廳是符合素食
+                                    restaurants_list.append(
+                                        CardFactory.hero_card(
+                                            HeroCard(
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']) + '#素食', 
+                                                images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                                buttons=[CardAction(type="openUrl",title="地圖",
+                                                value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"),
+                                                CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                                CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                            )
+                                        )
+                                    )
+                                else:
+                                    restaurants_list.append(
+                                        CardFactory.hero_card(
+                                            HeroCard(
+                                                title=restaurants_dict[i]['name'], text='推薦指數 : ' + str(restaurants_dict[i]['rating']), 
+                                                images=[CardImage(url=show_photo(restaurants_dict[i]['photo_reference']))], 
+                                                buttons=[CardAction(type="openUrl",title="地圖",
+                                                value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id'])), 
+                                                CardAction(type="imBack",title="點此看IG熱門貼文",value=restaurants_dict[i]['name']+"_IG"),
+                                                CardAction(type="imBack",title="點此看評論",value=restaurants_dict[i]['name']+"_評論"), 
+                                                CardAction(type="imBack",title="加入我的最愛",value=restaurants_dict[i]['name']+"_加入最愛")]
+                                            )
+                                        )
+                                    )
+
                         if(i>10):
                             break
 
