@@ -125,6 +125,7 @@ class MyBot(ActivityHandler):
                 await turn_context.send_activity(message)
             elif turn_context.activity.text == '歷史紀錄':
                 res = self.history.get_history(user_id)
+                print(user_id)
                 if (res is None):
                     await turn_context.send_activity("還沒有瀏覽紀錄，趕快搜尋餐廳吧~")
                 else:
