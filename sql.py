@@ -5,9 +5,9 @@ import traceback
 class DB_function:
 
     def __init__(self):
-        server = 'db-chatbot.database.windows.net'
-        database = 'restaurant_DB'
-        username = 'rest-admin'
+        server = 'dbrestaurantserver.database.windows.net'
+        database = 'dbrestaurant'
+        username = 'restadmin'
         password = 'Chatbot4'   
         # driver= '{ODBC Driver 17 for SQL Server}'
         cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
@@ -64,18 +64,3 @@ class DB_function:
 #         while row:
 #             print (str(row[0]) + " " + str(row[1]))
 #             row = cursor.fetchone()
-
-server = 'db-chatbot.database.windows.net'
-database = 'restaurant_DB'
-username = 'rest-admin'
-password = 'Chatbot4'   
-# driver= '{ODBC Driver 17 for SQL Server}'
-# try:
-print(pyodbc.dataSources())
-print(pyodbc.drivers())
-
-drivers = [item for item in pyodbc.drivers()]
-print(drivers)
-driver = drivers[-1]
-print("driver:{}".format(driver))
-cnxn = pyodbc.connect('DRIVER={%s};SERVER='%(driver)+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
