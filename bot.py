@@ -84,13 +84,12 @@ class MyBot(ActivityHandler):
             for ll in luis_result.entities:
                 # print(ll.entity)
                 entities_list.append(ll.entity)
-            # entities_list = "".join(
-            #     [entity_obj.entity for entity_obj in luis_result.entities]
-            # )
             print(entities_list)
             print(len(entities_list))
             if len(entities_list) == 1:
                 entity = entities_list[0]
+            else:
+                entity = str(entities_list[0]+'^'+entities_list[1])
         else:
             if entity != '素食' and entity != '咖啡廳' and entity != '牛排':
                 await turn_context.send_activity("無法了解您的需求，美食公道伯在這邊先推薦幾家給您😉")
@@ -100,7 +99,7 @@ class MyBot(ActivityHandler):
                     subtitle= '請選擇您想吃的類型： 😗'
                     , buttons=[CardAction(type="imBack",title="咖啡廳",value="我想吃咖啡廳")
                     , CardAction(type="imBack",title="牛排",value="我想吃牛排")
-                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
+                    , CardAction(type="imBack",title="素食",value="我想吃素食")]
                     ))
                 ])
                 await turn_context.send_activity(message)
