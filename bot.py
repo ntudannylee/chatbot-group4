@@ -223,6 +223,7 @@ class MyBot(ActivityHandler):
                 if(intent == '使用者地理位置'):
                     print('123123')
                     restaurants_dict = googlemaps_API(msg, money_status, '')
+                    print(restaurants_dict)
                 print('money_status:', money_status)
                 print('msg:', msg)
                 # 沒有餐廳的狀況
@@ -236,9 +237,9 @@ class MyBot(ActivityHandler):
                     for i in range(len(restaurants_dict)):
                         for a in good_list:
                             for b in vegetable_list:
-                                name = re.sub(r'[\':\s ,]*｜', '', restaurants_dict[i]['name'])
+                                #name = re.sub(r'[\':\s ,]*｜', '', restaurants_dict[i]['name'])
 
-                                if name in a and name in b :#餐廳是符合友善環境而且素食
+                                if restaurants_dict[i]['name'] in a and restaurants_dict[i]['name'] in b :#餐廳是符合友善環境而且素食
                                     restaurants_list.append(
                                         CardFactory.hero_card(
                                             HeroCard(
@@ -251,7 +252,7 @@ class MyBot(ActivityHandler):
                                             )
                                         )
                                     )
-                                elif  name in a : #餐廳是符合友善環境
+                                elif  restaurants_dict[i]['name'] in a : #餐廳是符合友善環境
                                     restaurants_list.append(
                                         CardFactory.hero_card(
                                             HeroCard(
@@ -264,7 +265,7 @@ class MyBot(ActivityHandler):
                                             )
                                         )
                                     )
-                                elif  name in b:  #餐廳是符合素食
+                                elif  restaurants_dict[i]['name'] in b:  #餐廳是符合素食
                                     restaurants_list.append(
                                         CardFactory.hero_card(
                                             HeroCard(
