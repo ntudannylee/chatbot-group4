@@ -31,7 +31,7 @@ class my_favorite:
                 put_back = ''
                 for i in range(len(fav)):
                     put_back += fav[i] + ' '
-                query = 'UPDATE user_info SET favorite=\'' + put_back + ' ' + output + '\' WHERE ID=\'' + user_id + '\';'
+                query = 'UPDATE user_info SET favorite=\'' + put_back + output + '\' WHERE ID=\'' + user_id + '\';'
                 self.db_func.DB_insert(query)
                 self.db_func.DB_commit()
                 return ('已把' + output + '加入我的最愛中!!')

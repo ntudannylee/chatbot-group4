@@ -26,7 +26,7 @@ class history:
                 for i in range(len(history)):
                     put_back += history[i] + ' '
                 counter = (counter + 1) % 10
-                self.db_func.DB_insert('UPDATE user_info SET recently=\'' + put_back + ' ' + output + '\' WHERE ID=\'' + user_id + '\';')
+                self.db_func.DB_insert('UPDATE user_info SET recently=\'' + put_back + output + '\' WHERE ID=\'' + user_id + '\';')
                 self.db_func.DB_insert('UPDATE user_info SET counter=\'' + counter + '\' WHERE ID=\'' + user_id + '\';')
                 self.db_func.DB_commit()
         else:
