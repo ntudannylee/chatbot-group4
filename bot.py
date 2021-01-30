@@ -149,7 +149,8 @@ class MyBot(ActivityHandler):
             # 佑誠的func
             blog_re=[]
             blog_re = blogcrawler(turn_context.activity.text)
-
+            print(re)
+            print(blog_re)
 
             review_list = []
             for index in range(len(blog_re)):
