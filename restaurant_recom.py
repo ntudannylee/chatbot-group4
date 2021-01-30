@@ -100,4 +100,4 @@ def show_photo(ref):
 def find_position_with_xy(place):
     geocode_result = gmaps.geocode(place)
     if geocode_result:
-        return geocode_result[0]['formatted_address']
+        return (geocode_result[0]['formatted_address'], geocode_result[0][place_id])

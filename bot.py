@@ -125,10 +125,13 @@ class MyBot(ActivityHandler):
                 fav_list = []
                 for length in range(len(res)):
                     rest_name = res[length]
-                    rest_location = find_position_with_xy(rest_name)
-                    fav_list.append(CardFactory.thumbnail_card(ThumbnailCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type='openUrl', title='導航', value="https://www.google.com/maps/search/?api=1&query=" + str(rest_name))])))
+                    rest_location, rest_id = find_position_with_xy(rest_name)
+                    x, y = googlemaps_search_location(rest_name)
+                    print(x)
+                    # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type='openUrl', title='導航', value="https://www.google.com/maps/search/?api=1&query=" + str(x) + "," + str(y) +"&query_place_id="+str(rest_id)])))
                     # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
                     #             value="https://www.google.com/maps/search/?api=1&query=" + rest_name)])))
+                    # value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id']
                 message = MessageFactory.carousel(fav_list)                   
                 await turn_context.send_activity(message)
         elif "IG" in turn_context.activity.text:
