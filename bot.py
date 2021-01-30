@@ -65,14 +65,7 @@ class MyBot(ActivityHandler):
         ## QnA Maker's response
         response = await self.qna_maker.get_answers(turn_context)
 
-        ## LUIS's result & intent
-        recognizer_result = await self.recognizer.recognize(turn_context)
-        # parse intent and entity 
-        intent = LuisRecognizer.top_intent(recognizer_result)
-        print(intent)
-        ## get user input and make response
-        luis_result = recognizer_result.properties["luisResult"]
-        entity=''
+        
             
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
@@ -221,11 +214,20 @@ class MyBot(ActivityHandler):
                 message = MessageFactory.carousel(restaurants_list)                   
                 await turn_context.send_activity(message)
         else:
+            ## LUIS's result & intent
+            recognizer_result = await self.recognizer.recognize(turn_context)
+            # parse intent and entity 
+            intent = LuisRecognizer.top_intent(recognizer_result)
+            print(intent)
+            ## get user input and make response
+            luis_result = recognizer_result.properties["luisResult"]
+            entity=''
             if luis_result.entities:
                 entities_list =[]
                 for ll in luis_result.entities:
                     print(turn_context.activity.text)
                     print(ll)
+                    ll.entity = ll.entity.replace(" ",'')
                     entities_list.append(ll.entity)
                 print(entities_list)
                 print(len(entities_list))
@@ -235,7 +237,7 @@ class MyBot(ActivityHandler):
                 else:
                     entity = entities_list[0]+'^'+entities_list[1]
                     print("double entity:", entity)
-
+            entity = entity.replace("\x08",'')
             if entity == '':
                 message = MessageFactory.carousel([
                     CardFactory.hero_card(
@@ -256,9 +258,9 @@ class MyBot(ActivityHandler):
                         CardFactory.hero_card(
                           HeroCard(title='您想吃的食物為：' + str(entity)
                         , subtitle= '請選擇您的預算區間： 🤑'
-                        , buttons=[CardAction(type="imBack",title="$$$",value="我想吃" + str(entity) + "_$$$")
-                        , CardAction(type="imBack",title="$$",value="我想吃" + str(entity) + "_$$")
-                        , CardAction(type="imBack",title="$",value="我想吃" + str(entity) + "_$")]
+                        , buttons=[CardAction(type="imBack",title="$$$",value="我想吃"+str(entity)+"_$$$")
+                        , CardAction(type="imBack",title="$$",value="我想吃"+str(entity)+"_$$")
+                        , CardAction(type="imBack",title="$",value="我想吃"+str(entity)+"_$")]
                         ))
                 ])
                 await turn_context.send_activity(message)
