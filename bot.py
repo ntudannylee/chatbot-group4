@@ -64,8 +64,6 @@ class MyBot(ActivityHandler):
 
         ## QnA Maker's response
         response = await self.qna_maker.get_answers(turn_context)
-
-        
             
     # check if user typing in qna maker
         if response and len(response) > 0 and (turn_context.activity.text != response[0].answer):
@@ -104,9 +102,9 @@ class MyBot(ActivityHandler):
                 for length in range(len(res)):
                     rest_name = res[length]
                     rest_location = find_position_with_xy(rest_name)
-                    # (x, y) = googlemaps_search_location(rest_name)
+                    (x, y) = googlemaps_search_location(rest_name)
                     history_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
-                                value="https://www.google.com/maps/search/?api=1&query=" + str(rest_name))])))
+                                value="https://www.google.com/maps/search/?api=1&query=" + str(x)+ ',' + str(y))])))
                 message = MessageFactory.carousel(history_list)                   
                 await turn_context.send_activity(message)
         elif turn_context.activity.text == '我的最愛':
@@ -117,14 +115,12 @@ class MyBot(ActivityHandler):
                 fav_list = []
                 for length in range(len(res)):
                     rest_name = res[length]
-                    rest_location, rest_id = find_position_with_xy(rest_name)
-                    x, y = googlemaps_search_location(rest_name)
-                    print(x)
-                    # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type='openUrl', title='導航', value="https://www.google.com/maps/search/?api=1&query=" + str(x) + "," + str(y) +"&query_place_id="+str(rest_id)])))
-                    # fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
-                    #             value="https://www.google.com/maps/search/?api=1&query=" + rest_name)])))
-                    # value="https://www.google.com/maps/search/?api=1&query=" + str(restaurants_dict[i]['location_x']) + "," + str(restaurants_dict[i]['location_y']) +"&query_place_id="+str(restaurants_dict[i]['place_id']
-                message = MessageFactory.carousel(fav_list)                   
+                    rest_location = find_position_with_xy(rest_name)
+                    (x, y) = googlemaps_search_location(rest_name)
+                    fav_list.append(CardFactory.hero_card(HeroCard(title=rest_name, subtitle=rest_location, buttons=[CardAction(type="openUrl",title="地圖",
+                                value="https://www.google.com/maps/search/?api=1&query=" + str(x)+ ',' + str(y))])))
+                message = MessageFactory.carousel(fav_list)   
+                await turn_context.send_activity(message)                
         elif "加入最愛" in turn_context.activity.text: ## add favorite button
             rest_name = turn_context.activity.text.split("_")[0]
             message = self.favor.add_favorite(user_id, rest_name)
@@ -176,8 +172,9 @@ class MyBot(ActivityHandler):
                 message = MessageFactory.carousel(review_list)   
             else:
                 message = "未查詢到這間餐廳的相關評論文章喔～ 歡迎您發布首則評論！"
+            
             rest_name = turn_context.activity.text.split("_")[0]
-            # self.history.add_histsory(user_id, rest_name)
+            self.history.add_history(user_id, rest_name)
 
             message = MessageFactory.carousel(review_list)                   
             await turn_context.send_activity(message)
