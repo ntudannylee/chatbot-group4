@@ -1,6 +1,5 @@
 ### 2021 Microsoft x TSMC careerhack 決賽
-### 主題：聊天機器人
-### 作品-美食公道伯
+### 主題：聊天機器人 - 美食公道伯
 
 ## 工具
 - Microsoft Azure Service, including LUIS, SQL database, Application Insights.
@@ -10,10 +9,14 @@
 - 爬蟲相關工具
 
 ## 主題發想
-等等要吃什麼？
-附近有啥好吃的？
-會不會踩到雷啊？
-這三個問題是現代人對於美食需求的三大問題
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%871.jpeg)
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%873.jpeg)
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%874.jpeg)
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%875.jpeg)
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%876.jpeg)
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%877.jpeg)
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%878.jpeg)
+
  
 ## 作法
 - 透過Azure的自然語言模型LUIS來對使用者的輸入進行分析判斷，知道其intent後以擷取句子中的entity來進行相對應的推薦
