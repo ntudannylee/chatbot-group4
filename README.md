@@ -1,31 +1,25 @@
-# echo-bot danny
+### 2021 Microsoft x TSMC careerhack 決賽
+### 主題：聊天機器人
+### 作品-美食公道伯
 
-A bot that echoes back user response.
+## 工具
+- Microsoft Azure Service, including LUIS, SQL database, Application Insights.
+- QnA Maker
+- google map API
+- Line messaging API
+- 爬蟲相關工具
 
-This bot has been created using [Bot Framework](https://dev.botframework.com), it shows how to create a simple bot that accepts input from the user and echoes it back.
-
-## Prerequisites
-
-This sample **requires** prerequisites in order to run.
-
-### Install Python 3.6
-
-## Running the sample
-- Run `pip install -r requirements.txt` to install all dependencies
-- Run `python app.py`
-
-
-## Testing the bot using Bot Framework Emulator
-
-[Bot Framework Emulator](https://github.com/microsoft/botframework-emulator) is a desktop application that allows bot developers to test and debug their bots on localhost or running remotely through a tunnel.
-
-- Install the Bot Framework Emulator version 4.3.0 or greater from [here](https://github.com/Microsoft/BotFramework-Emulator/releases)
-
-### Connect to the bot using Bot Framework Emulator
-
-- Launch Bot Framework Emulator
-- Enter a Bot URL of `http://localhost:3978/api/messages`
-
+## 主題發想
+等等要吃什麼？
+附近有啥好吃的？
+會不會踩到雷啊？
+這三個問題是現代人對於美食需求的三大問題
+ 
+## 作法
+- 透過Azure的自然語言模型LUIS來對使用者的輸入進行分析判斷，知道其intent後以擷取句子中的entity來進行相對應的推薦
+- 透過QnA Maker建立知識庫，以及聊天機器人相對應的問與答支援
+- 透過BOT Framework模擬器跑模擬
+- 以Line作為channel
 
 ## Further reading
 
