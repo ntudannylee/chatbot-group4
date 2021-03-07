@@ -18,6 +18,28 @@
 ![image](https://github.com/ntudannylee/chatbot-group4/blob/master/%E6%8A%95%E5%BD%B1%E7%89%878.jpeg)
 
  
+## DEMO截圖
+加入好友
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E5%8A%A0%E5%85%A5%E5%A5%BD%E5%8F%8B.png)
+四大功能，包括使用說明、個人化推薦、瀏覽紀錄、我的最愛
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E5%9B%9B%E5%80%8B%E5%8A%9F%E8%83%BD.png)
+個人化推薦
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E5%80%8B%E4%BA%BA%E5%8C%96%E6%8E%A8%E8%96%A6.png)
+使用方式：可輸入我想吃XX or 我在哪 or 我在XX想吃YY，系統都會推薦給您餐點
+e.g. 我在公館
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E6%88%91%E5%9C%A8%E5%85%AC%E9%A4%A8.png)
+e.g. 我想吃牛排
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E6%88%91%E6%83%B3%E5%90%83%E7%89%9B%E6%8E%92.png)
+e.g. 我想在文山區喝咖啡
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E6%88%91%E6%83%B3%E5%9C%A8%E6%96%87%E5%B1%B1%E5%8D%80%E5%96%9D%E5%92%96%E5%95%A1.png)
+點擊預算之後，系統就會發送美食字卡給使用者
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E6%88%91%E5%9C%A8%E5%85%AC%E9%A4%A8%EF%BC%84%EF%BC%84%EF%BC%84.png)
+點擊地圖會導到google map應用程式app
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E5%9C%B0%E5%9C%96.png)
+點擊評論會抓各大美食部落格的字卡給使用者
+![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E8%A9%95%E8%AB%96.png)
+
+ 
 ## 作法
 - 透過Azure的自然語言模型LUIS來對使用者的輸入進行分析判斷，知道其intent後以擷取句子中的entity來進行相對應的推薦
 - 透過QnA Maker建立知識庫，以及聊天機器人相對應的問與答支援
