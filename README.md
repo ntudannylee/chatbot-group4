@@ -21,7 +21,7 @@
 ## DEMO截圖
 加入好友
 
-![image](https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E5%8A%A0%E5%85%A5%E5%A5%BD%E5%8F%8B.png | width=100)
+<img src="https://github.com/ntudannylee/chatbot-group4/blob/master/demo_%E5%8A%A0%E5%85%A5%E5%A5%BD%E5%8F%8B.png" width="100" height="100">
 
 四大功能，包括使用說明、個人化推薦、瀏覽紀錄、我的最愛
 
